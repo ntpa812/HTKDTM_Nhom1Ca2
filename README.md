@@ -4,16 +4,14 @@
           │      CLIENT        │
           │────────────────────│
           │  • Web (ReactJS)   │
-          │  • Mobile (Android │
-          │    / Flutter)      │
           └─────────┬──────────┘
                     │  Request/Response (REST API / HTTPS)
                     ▼
           ┌────────────────────┐
           │      BACKEND       │
           │────────────────────│
-          │  • Spring Boot /   │
-          │    Django REST API │
+          │  • Node.js/        |
+          |    RESTful API     │
           │  • Auth, API,      │
           │    Business Logic  │
           └─────────┬──────────┘
@@ -24,7 +22,7 @@
     ┌─────────────────┐      ┌────────────────────┐
     │    DATABASE     │      │    AI ENGINE       │
     │─────────────────│      │────────────────────│
-    │ • MySQL/Postgres│      │ • ML Models        │
+    │ • MySQL         │      │ • ML Models        │
     │   (dữ liệu user,│      │   (Recommendation, │
     │    tiến độ)     │      │   Prediction)      │
     │ • MongoDB       │      │ • TensorFlow/      │
