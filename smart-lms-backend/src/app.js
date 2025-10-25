@@ -28,3 +28,6 @@ const coursesRouter = require('./routes/courses');
 const analyticsRouter = require('./routes/analytics');
 app.use('/api/courses', coursesRouter);
 app.use('/api/analytics', analyticsRouter);
+
+const authRouter = require('./routes/auth');
+app.use('/api/auth', authRouter);
