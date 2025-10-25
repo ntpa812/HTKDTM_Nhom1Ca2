@@ -1,6 +1,16 @@
-// routes/course.js
-const router = require('express').Router();
-router.get('/', async (req, res) => { ... }); // lấy danh sách khóa học
-router.post('/', async (req, res) => { ... }); // thêm mới
-router.get('/:id/materials', async (req, res) => { ... }); // lấy materials
+// src/routes/courses.js
+const express = require('express');
+const router = express.Router();
+const { poolPromise } = require('../utils/mssql');
+
+router.get('/', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query('SELECT id, title, difficulty FROM courses');
+        res.json(result.recordset);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 module.exports = router;

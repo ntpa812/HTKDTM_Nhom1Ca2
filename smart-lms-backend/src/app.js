@@ -23,3 +23,8 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+const coursesRouter = require('./routes/courses');
+const analyticsRouter = require('./routes/analytics');
+app.use('/api/courses', coursesRouter);
+app.use('/api/analytics', analyticsRouter);
