@@ -86,13 +86,13 @@ function Login() {
                     </button>
                 </form>
 
-                <div className="login-footer">
+                {/* <div className="login-footer">
                     <p>Test accounts:</p>
                     <ul>
                         <li>Email: student01@test.com | Password: password123</li>
                         <li>Email: admin@smartlms.com | Password: admin123</li>
                     </ul>
-                </div>
+                </div> */}
             </div>
         </div>
     );

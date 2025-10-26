@@ -1,37 +1,59 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
-import Layout from "./components/layout/Layout";
-import Dashboard from "./pages/Dashboard";
-import LearningPath from "./pages/LearningPath";
-import Courses from "./pages/Courses";
-import Analytics from "./pages/Analytics";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import Courses from './pages/Courses';
+import Analytics from './pages/Analytics';
+import LearningPath from './pages/LearningPath';
 
 function App() {
-  const user = localStorage.getItem("user");
+  const isAuthenticated = () => {
+    return localStorage.getItem('token') !== null;
+  };
+
+  const PrivateRoute = ({ children }) => {
+    return isAuthenticated() ? children : <Navigate to="/login" />;
+  };
 
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
-          path="/*"
+          path="/dashboard"
           element={
-            user ? (
-              <Layout>
-                <Routes>
-                  <Route index element={<Dashboard />} />
-                  <Route path="learning-path" element={<LearningPath />} />
-                  <Route path="courses" element={<Courses />} />
-                  <Route path="analytics" element={<Analytics />} />
-                </Routes>
-              </Layout>
-            ) : (
-              <Navigate to="/login" />
-            )
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
           }
         />
+        <Route
+          path="/courses"
+          element={
+            <PrivateRoute>
+              <Courses />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <PrivateRoute>
+              <Analytics />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/learning"
+          element={
+            <PrivateRoute>
+              <LearningPath />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
 

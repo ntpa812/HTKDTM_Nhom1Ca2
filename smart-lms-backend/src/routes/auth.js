@@ -9,6 +9,7 @@ const JWT_EXPIRES_IN = '7d';
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
+    console.log('📥 Login request body:', req.body);
     try {
         const { email, password } = req.body;
 

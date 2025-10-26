@@ -1,38 +1,36 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from 'react';
+import Layout from '../components/layout/Layout';
 
-export default function Courses() {
-    const [courses, setCourses] = useState([]);
-
-    useEffect(() => {
-        axios.get("/api/courses")
-            .then(res => setCourses(res.data))
-            .catch(err => console.error(err));
-    }, []);
-
+function Courses() {
     return (
-        <div>
-            <h1 className="text-2xl font-bold mb-6 text-indigo-700">Danh sách khoá học</h1>
-            <div className="bg-white p-4 rounded-lg shadow">
-                <table className="min-w-full">
-                    <thead>
-                        <tr>
-                            <th className="px-4 py-2 text-left">#</th>
-                            <th className="px-4 py-2 text-left">Tên khoá học</th>
-                            <th className="px-4 py-2 text-left">Mức độ</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {courses.map((c, idx) => (
-                            <tr key={c.id} className="border-t hover:bg-indigo-50">
-                                <td className="px-4 py-2">{idx + 1}</td>
-                                <td className="px-4 py-2 font-semibold">{c.title}</td>
-                                <td className="px-4 py-2">{c.difficulty}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+        <Layout title="Khóa học" subtitle="Danh sách tất cả các khóa học">
+            <div style={styles.placeholder}>
+                <h3 style={styles.placeholderTitle}>📚 Trang Khóa học</h3>
+                <p style={styles.placeholderText}>Đang phát triển...</p>
             </div>
-        </div>
+        </Layout>
     );
 }
+
+const styles = {
+    placeholder: {
+        background: 'white',
+        padding: '80px 40px',
+        borderRadius: '16px',
+        textAlign: 'center',
+        border: '2px solid #e8eaff'
+    },
+    placeholderTitle: {
+        color: '#667eea',
+        fontSize: '24px',
+        fontWeight: '700',
+        margin: '0 0 16px 0'
+    },
+    placeholderText: {
+        color: '#6c757d',
+        fontSize: '16px',
+        margin: 0
+    }
+};
+
+export default Courses;

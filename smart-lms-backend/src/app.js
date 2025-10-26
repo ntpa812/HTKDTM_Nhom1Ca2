@@ -7,18 +7,32 @@ const { poolPromise } = require('../config/database');
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// ============================================
+// MIDDLEWARE - PHẢI ĐẶT ĐÚNG THỨ TỰ
+// ============================================
+// 1. CORS TRƯỚC TIÊN
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// 2. BODY PARSERS
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// 3. LOGGER
 app.use(morgan('dev'));
 
-// Root endpoint
+// ============================================
+// ROOT ENDPOINTS
+// ============================================
 app.get('/', (req, res) => {
     res.send('Smart LMS Backend API');
 });
 
-// Test database connection endpoint
+// Test database connection
 app.get('/api/test-db', async (req, res) => {
     try {
         const pool = await poolPromise;
@@ -36,10 +50,15 @@ app.get('/api/test-db', async (req, res) => {
     }
 });
 
-// Register API routes
-const apiRoutes = require('./routes');  // Import router object
-app.use('/api', apiRoutes);  // Mount under /api
+// ============================================
+// API ROUTES - SAU KHI MIDDLEWARE
+// ============================================
+const apiRoutes = require('./routes');
+app.use('/api', apiRoutes);
 
+// ============================================
+// ERROR HANDLERS
+// ============================================
 // 404 handler
 app.use((req, res) => {
     res.status(404).json({
@@ -49,19 +68,23 @@ app.use((req, res) => {
     });
 });
 
-// Error handler
+// Global error handler
 app.use((err, req, res, next) => {
-    console.error('Error:', err);
+    console.error('❌ Error:', err);
     res.status(err.status || 500).json({
         success: false,
-        message: err.message || 'Internal Server Error'
+        message: err.message || 'Internal Server Error',
+        error: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
 });
 
+// ============================================
+// START SERVER
+// ============================================
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`✅ Server running on http://localhost:${PORT}`);
 });
 
 module.exports = app;

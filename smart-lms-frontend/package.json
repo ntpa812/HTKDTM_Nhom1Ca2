@@ -43,6 +43,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {},
   "start": "set PORT=3001 && react-scripts start"
 }
