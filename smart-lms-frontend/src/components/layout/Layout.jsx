@@ -44,6 +44,14 @@ const Layout = () => {
                         );
                     })}
                 </nav>
+
+                <button
+                    className="ml-2 px-4 py-2 bg-red-500 text-white rounded"
+                    onClick={() => { localStorage.removeItem("user"); window.location.href = "/login"; }}
+                >
+                    Đăng xuất
+                </button>
+
             </div>
 
             {/* Main Content */}
@@ -78,7 +86,12 @@ const Layout = () => {
                 </main>
             </div>
         </div>
+
+
+
     );
 };
+
+
 
 export default Layout;
