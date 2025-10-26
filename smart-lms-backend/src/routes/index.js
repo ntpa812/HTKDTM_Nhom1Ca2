@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-// Import routes
 const authRoutes = require('./auth');
 const coursesRoutes = require('./courses');
-const dashboardRoutes = require('./dashboard');
+// const dashboardRoutes = require('./dashboard'); // ← Make sure this line exists
 
-// Register routes
 router.use('/auth', authRoutes);
 router.use('/courses', coursesRoutes);
-router.use('/dashboard', dashboardRoutes);
+// router.use('/dashboard', dashboardRoutes); // ← Make sure this line exists
 
 // Health check
 router.get('/health', (req, res) => {
