@@ -1,48 +1,101 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import './Login.css';
 
-export default function Login() {
+const API_BASE_URL = 'http://localhost:5000/api';
+
+function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [err, setErr] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setErr("");
+        setError('');
+        setLoading(true);
+
         try {
-            const res = await axios.post("/api/auth/login", { email, password });
-            localStorage.setItem("user", JSON.stringify(res.data.user));
-            navigate("/"); // Chuyển về dashboard sau khi login
+            const response = await axios.post(`${API_BASE_URL}/auth/login`, {
+                email,
+                password
+            });
+
+            if (response.data.success) {
+                // Save token to localStorage
+                localStorage.setItem('token', response.data.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.data.user));
+
+                // Redirect to dashboard
+                navigate('/dashboard');
+            }
+
         } catch (err) {
-            setErr(err.response?.data?.message || "Lỗi server");
+            console.error('Login error:', err);
+            setError(
+                err.response?.data?.message ||
+                'Lỗi đăng nhập. Vui lòng thử lại.'
+            );
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-blue-400 to-indigo-600">
-            <form className="bg-white shadow-lg rounded p-8 w-full max-w-md" onSubmit={handleSubmit}>
-                <h1 className="text-2xl font-bold mb-4 text-indigo-700">Đăng nhập Smart LMS</h1>
-                {err && <div className="mb-4 text-red-600">{err}</div>}
-                <input
-                    type="email"
-                    className="w-full p-3 border rounded mb-4"
-                    placeholder="Email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    required
-                />
-                <input
-                    type="password"
-                    className="w-full p-3 border rounded mb-6"
-                    placeholder="Mật khẩu"
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    required
-                />
-                <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded font-bold">Đăng nhập</button>
-            </form>
+        <div className="login-container">
+            <div className="login-box">
+                <h2 className="login-title">Đăng nhập Smart LMS</h2>
+
+                {error && (
+                    <div className="error-message">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit}>
+                    <div className="form-group">
+                        <input
+                            type="email"
+                            placeholder="student1@test.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <input
+                            type="password"
+                            placeholder="••••••••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            disabled={loading}
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="login-button"
+                        disabled={loading}
+                    >
+                        {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                    </button>
+                </form>
+
+                <div className="login-footer">
+                    <p>Test accounts:</p>
+                    <ul>
+                        <li>Email: student01@test.com | Password: password123</li>
+                        <li>Email: admin@smartlms.com | Password: admin123</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     );
 }
+
+export default Login;
