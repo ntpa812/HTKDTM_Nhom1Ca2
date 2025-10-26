@@ -6,7 +6,6 @@ import Courses from './pages/Courses';
 import Analytics from './pages/Analytics';
 import LearningPath from './pages/LearningPath';
 import InstructorLearningPaths from './pages/InstructorLearningPaths';
-import CreateLearningPath from './pages/CreateLearningPath';
 
 function App() {
   const isAuthenticated = () => {
@@ -65,14 +64,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/create-path"
-          element={
-            <PrivateRoute>
-              <CreateLearningPath />
-            </PrivateRoute>
-          }
-        />
+
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>

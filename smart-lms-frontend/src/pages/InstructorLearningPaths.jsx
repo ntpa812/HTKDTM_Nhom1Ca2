@@ -1,9 +1,10 @@
-// smart-lms-frontend/src/pages/InstructorLearningPaths.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
+import CreateLearningPathModal from '../components/modals/CreateLearningPathModal';
 
 function InstructorLearningPaths() {
+    const [showCreateModal, setShowCreateModal] = useState(false);
     const navigate = useNavigate();
     const [myPaths, setMyPaths] = useState([]);
     const [stats, setStats] = useState({});
@@ -63,6 +64,32 @@ function InstructorLearningPaths() {
         });
     }, []);
 
+    // Event listener cho sidebar trigger - SỬA: đặt trong useEffect
+    useEffect(() => {
+        const handleOpenModal = () => setShowCreateModal(true);
+        window.addEventListener('openCreatePathModal', handleOpenModal);
+
+        return () => {
+            window.removeEventListener('openCreatePathModal', handleOpenModal);
+        };
+    }, []);
+
+    const handleCreateSuccess = () => {
+        // Refresh the list, show success message
+        alert('Learning path đã được tạo thành công!');
+
+        // TODO: Reload data from API
+        // fetchMyPaths();
+
+        setShowCreateModal(false);
+
+        // Update stats (mock)
+        setStats(prev => ({
+            ...prev,
+            totalPaths: prev.totalPaths + 1
+        }));
+    };
+
     const handlePublishToggle = (pathId) => {
         setMyPaths(paths =>
             paths.map(path =>
@@ -71,11 +98,36 @@ function InstructorLearningPaths() {
                     : path
             )
         );
+
+        // Update stats
+        setStats(prev => {
+            const path = myPaths.find(p => p.id === pathId);
+            const newPublishedCount = path?.isPublished
+                ? prev.publishedPaths - 1
+                : prev.publishedPaths + 1;
+
+            return {
+                ...prev,
+                publishedPaths: newPublishedCount
+            };
+        });
     };
 
     const handleDeletePath = (pathId) => {
         if (window.confirm('Bạn có chắc muốn xóa learning path này?')) {
+            const pathToDelete = myPaths.find(p => p.id === pathId);
+
             setMyPaths(paths => paths.filter(path => path.id !== pathId));
+
+            // Update stats
+            setStats(prev => ({
+                ...prev,
+                totalPaths: prev.totalPaths - 1,
+                publishedPaths: pathToDelete?.isPublished
+                    ? prev.publishedPaths - 1
+                    : prev.publishedPaths,
+                totalEnrollments: prev.totalEnrollments - (pathToDelete?.enrolledCount || 0)
+            }));
         }
     };
 
@@ -102,9 +154,17 @@ function InstructorLearningPaths() {
 
                     <button
                         style={styles.createButton}
-                        onClick={() => navigate('/create-path')}
+                        onClick={() => setShowCreateModal(true)}
+                        onMouseEnter={(e) => {
+                            e.target.style.transform = 'translateY(-2px)';
+                            e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.target.style.transform = 'translateY(0)';
+                            e.target.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.3)';
+                        }}
                     >
-                        ➕ Tạo Learning Path mới
+                        Tạo Learning Path mới
                     </button>
                 </div>
 
@@ -130,11 +190,37 @@ function InstructorLearningPaths() {
 
                 {/* Learning Paths Table */}
                 <div style={styles.tableSection}>
-                    <h3 style={styles.sectionTitle}>Danh sách Learning Paths</h3>
+                    <div style={styles.sectionHeader}>
+                        <h3 style={styles.sectionTitle}>Danh sách Learning Paths</h3>
+
+                        {/* Quick filters */}
+                        <div style={styles.quickFilters}>
+                            <button style={{ ...styles.filterBtn, ...styles.filterBtnActive }}>
+                                Tất cả ({myPaths.length})
+                            </button>
+                            <button style={styles.filterBtn}>
+                                Published ({myPaths.filter(p => p.isPublished).length})
+                            </button>
+                            <button style={styles.filterBtn}>
+                                Draft ({myPaths.filter(p => !p.isPublished).length})
+                            </button>
+                        </div>
+                    </div>
 
                     <div style={styles.pathsList}>
                         {myPaths.map(path => (
-                            <div key={path.id} style={styles.pathRow}>
+                            <div
+                                key={path.id}
+                                style={styles.pathRow}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0,0,0,0.1)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }}
+                            >
                                 <div style={styles.pathMainInfo}>
                                     <div style={styles.pathHeader}>
                                         <h4 style={styles.pathTitle}>{path.title}</h4>
@@ -181,6 +267,8 @@ function InstructorLearningPaths() {
                                     <button
                                         style={styles.actionBtn}
                                         onClick={() => navigate(`/learning-paths/${path.id}/edit`)}
+                                        onMouseEnter={(e) => e.target.style.background = '#4b5563'}
+                                        onMouseLeave={(e) => e.target.style.background = '#6b7280'}
                                     >
                                         ✏️ Sửa
                                     </button>
@@ -188,6 +276,8 @@ function InstructorLearningPaths() {
                                     <button
                                         style={styles.actionBtn}
                                         onClick={() => navigate(`/learning-paths/${path.id}/analytics`)}
+                                        onMouseEnter={(e) => e.target.style.background = '#4b5563'}
+                                        onMouseLeave={(e) => e.target.style.background = '#6b7280'}
                                     >
                                         📊 Analytics
                                     </button>
@@ -198,6 +288,12 @@ function InstructorLearningPaths() {
                                             backgroundColor: path.isPublished ? '#f59e0b' : '#10b981'
                                         }}
                                         onClick={() => handlePublishToggle(path.id)}
+                                        onMouseEnter={(e) => {
+                                            e.target.style.background = path.isPublished ? '#d97706' : '#059669';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.target.style.background = path.isPublished ? '#f59e0b' : '#10b981';
+                                        }}
                                     >
                                         {path.isPublished ? '📤 Unpublish' : '🚀 Publish'}
                                     </button>
@@ -205,6 +301,8 @@ function InstructorLearningPaths() {
                                     <button
                                         style={{ ...styles.actionBtn, backgroundColor: '#ef4444' }}
                                         onClick={() => handleDeletePath(path.id)}
+                                        onMouseEnter={(e) => e.target.style.background = '#dc2626'}
+                                        onMouseLeave={(e) => e.target.style.background = '#ef4444'}
                                     >
                                         🗑️ Xóa
                                     </button>
@@ -222,13 +320,20 @@ function InstructorLearningPaths() {
                             </p>
                             <button
                                 style={styles.createButton}
-                                onClick={() => navigate('/create-path')}
+                                onClick={() => setShowCreateModal(true)}
                             >
                                 ➕ Tạo Learning Path đầu tiên
                             </button>
                         </div>
                     )}
                 </div>
+
+                {/* Modal */}
+                <CreateLearningPathModal
+                    isOpen={showCreateModal}
+                    onClose={() => setShowCreateModal(false)}
+                    onSuccess={handleCreateSuccess}
+                />
             </div>
         </Layout>
     );
@@ -268,7 +373,8 @@ const styles = {
         fontWeight: '600',
         fontSize: '14px',
         cursor: 'pointer',
-        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)'
+        boxShadow: '0 4px 12px rgba(102, 126, 234, 0.3)',
+        transition: 'all 0.3s ease'
     },
     statsGrid: {
         display: 'grid',
@@ -281,7 +387,10 @@ const styles = {
         padding: '24px',
         borderRadius: '16px',
         border: '1px solid #e2e8f0',
-        textAlign: 'center'
+        textAlign: 'center',
+        transition: 'transform 0.2s ease',
+        cursor: 'default',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
     },
     statNumber: {
         fontSize: '32px',
@@ -298,13 +407,42 @@ const styles = {
         background: 'white',
         borderRadius: '16px',
         padding: '24px',
-        border: '1px solid #e2e8f0'
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+    },
+    sectionHeader: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: '24px',
+        flexWrap: 'wrap',
+        gap: '16px'
     },
     sectionTitle: {
         fontSize: '20px',
         fontWeight: '600',
         color: '#1e293b',
-        marginBottom: '24px'
+        margin: 0
+    },
+    quickFilters: {
+        display: 'flex',
+        gap: '8px'
+    },
+    filterBtn: {
+        background: 'none',
+        border: '1px solid #e5e7eb',
+        color: '#6b7280',
+        padding: '6px 12px',
+        borderRadius: '6px',
+        fontSize: '12px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        transition: 'all 0.2s ease'
+    },
+    filterBtnActive: {
+        background: '#667eea',
+        color: 'white',
+        borderColor: '#667eea'
     },
     pathsList: {
         display: 'flex',
@@ -318,7 +456,8 @@ const styles = {
         padding: '20px',
         border: '1px solid #e2e8f0',
         borderRadius: '12px',
-        background: '#f8fafc'
+        background: '#f8fafc',
+        transition: 'all 0.3s ease'
     },
     pathMainInfo: {
         flex: 1,
@@ -385,7 +524,8 @@ const styles = {
         fontSize: '12px',
         fontWeight: '500',
         cursor: 'pointer',
-        whiteSpace: 'nowrap'
+        whiteSpace: 'nowrap',
+        transition: 'all 0.2s ease'
     },
     emptyState: {
         textAlign: 'center',
