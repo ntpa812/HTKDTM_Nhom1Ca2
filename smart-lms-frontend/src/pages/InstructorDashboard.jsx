@@ -91,22 +91,15 @@ function InstructorDashboard() {
                             title="Tổng học viên"
                             value={mockData.stats.totalStudents}
                             change="+23"
-                            color="#10B981"
+                            color="#F59E0B"
                             icon="👨‍🎓"
                         />
                         <InstructorStatCard
                             title="Tỷ lệ hoàn thành TB"
                             value={mockData.stats.averageCompletion + '%'}
                             change="+5.2%"
-                            color="#F59E0B"
+                            color="#10B981"
                             icon="✅"
-                        />
-                        <InstructorStatCard
-                            title="Doanh thu"
-                            value={mockData.stats.totalRevenue}
-                            change="+12%"
-                            color="#764ba2"
-                            icon="💰"
                         />
                     </div>
 

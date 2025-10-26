@@ -1,13 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import DashboardRouter from './pages/DashboardRouter';  // Thêm import
 import Courses from './pages/Courses';
 import Analytics from './pages/Analytics';
 import LearningPath from './pages/LearningPath';
-
-import InstructorDashboard from './pages/InstructorDashboard';
-import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   const isAuthenticated = () => {
@@ -22,9 +19,18 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
+
+        {/* Thay thế 3 route dashboard bằng 1 route sử dụng DashboardRouter */}
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <DashboardRouter />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Giữ nguyên các route khác */}
         <Route
           path="/courses"
           element={

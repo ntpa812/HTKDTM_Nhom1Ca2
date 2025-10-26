@@ -6,13 +6,22 @@ import AdminDashboard from './AdminDashboard';
 
 function DashboardRouter() {
     const navigate = useNavigate();
+    const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     useEffect(() => {
-        if (!user.role) {
+        // Kiểm tra authentication
+        if (!token || !user.role) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
             navigate('/login');
         }
-    }, [user, navigate]);
+    }, [user, navigate, token]);
+
+    // Hiển thị loading nếu chưa có user data
+    if (!user.role) {
+        return <div>Loading...</div>;
+    }
 
     // Route based on role
     switch (user.role) {
