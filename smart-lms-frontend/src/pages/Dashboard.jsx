@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Sidebar from '../components/layout/Sidebar';
-import RecentActivities from '../components/RecentActivities';
+import RecentActivities from '../components/dashboard/RecentActivities';
+import UpcomingDeadlines from '../components/dashboard/UpcomingDeadlines';
 
 function Dashboard() {
     const [user, setUser] = useState(null);
@@ -89,7 +90,7 @@ function Dashboard() {
                         <StatCard title="Thời gian học" value="42h" change="+12h" color="#F59E0B" />
                     </div>
 
-                    {/* Charts + Recent Activities Grid */}
+                    {/* Charts + Activities/Deadlines Grid */}
                     <div style={styles.mainGrid}>
                         {/* Left Column - Charts */}
                         <div style={styles.chartsColumn}>
@@ -123,9 +124,12 @@ function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Right Column - Recent Activities */}
+                        {/* Right Column - Recent Activities + Deadlines */}
                         <div style={styles.activitiesColumn}>
                             <RecentActivities />
+                            <div style={{ marginTop: '24px' }}>
+                                <UpcomingDeadlines />
+                            </div>
                         </div>
                     </div>
 
@@ -279,7 +283,6 @@ const styles = {
         fontSize: '14px',
         fontWeight: '600'
     },
-    // NEW: Main grid for charts + activities
     mainGrid: {
         display: 'grid',
         gridTemplateColumns: '2fr 1fr',
