@@ -109,5 +109,70 @@ router.get('/deadlines', auth, async (req, res) => {
     }
 });
 
+// GET performance metrics
+router.get('/metrics', auth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const pool = await poolPromise;
+
+        // Get average score
+        const scoreResult = await pool.request()
+            .input('userId', userId)
+            .query(`
+                SELECT 
+                AVG(CAST(qa.score as FLOAT)) as averageScore,
+                (SELECT AVG(CAST(score as FLOAT)) FROM QuizAttempts) as classAverage
+                FROM QuizAttempts qa
+                WHERE qa.student_id = @userId AND qa.completed_at IS NOT NULL
+            `);
+
+        // Get completion rate
+        const completionResult = await pool.request()
+            .input('userId', userId)
+            .query(`
+                SELECT 
+                COUNT(CASE WHEN progress >= 100 THEN 1 END) * 100.0 / COUNT(*) as completionRate
+                FROM Enrollments
+                WHERE student_id = @userId
+            `);
+
+        // Get study time today
+        const studyTimeResult = await pool.request()
+            .input('userId', userId)
+            .input('today', new Date().toDateString())
+            .query(`
+                SELECT SUM(DATEDIFF(MINUTE, started_at, completed_at)) / 60.0 as studyTimeToday
+                FROM LessonProgress
+                WHERE student_id = @userId 
+                AND CAST(started_at as DATE) = @today
+            `);
+
+        res.json({
+            success: true,
+            data: {
+                averageScore: scoreResult.recordset[0].averageScore || 0,
+                classAverage: scoreResult.recordset[0].classAverage || 0,
+                completionRate: completionResult.recordset[0].completionRate || 0,
+                targetCompletionRate: 80,
+                studyTimeToday: studyTimeResult.recordset[0].studyTimeToday || 0,
+                studyTimeGoal: 4,
+                engagementScore: 85, // Calculate from multiple factors
+                badges: 12,
+                totalBadges: 20,
+                streak: 7,
+                bestStreak: 14,
+                performanceTrend: 'up'
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching metrics:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Lỗi khi lấy metrics',
+            error: error.message
+        });
+    }
+});
+
 
 module.exports = router;
