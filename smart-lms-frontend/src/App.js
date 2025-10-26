@@ -5,6 +5,8 @@ import DashboardRouter from './pages/DashboardRouter';  // Thêm import
 import Courses from './pages/Courses';
 import Analytics from './pages/Analytics';
 import LearningPath from './pages/LearningPath';
+import CourseDetail from './CourseDetail';
+import CourseSearchFilter from './CourseSearchFilter';
 
 function App() {
   const isAuthenticated = () => {
@@ -20,7 +22,6 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
 
-        {/* Thay thế 3 route dashboard bằng 1 route sử dụng DashboardRouter */}
         <Route
           path="/dashboard"
           element={
@@ -32,6 +33,16 @@ function App() {
 
         {/* Giữ nguyên các route khác */}
         <Route
+          path="/courses/search"
+          element={
+            <PrivateRoute>
+              <CourseSearchFilter />
+            </PrivateRoute>
+          }
+        />
+
+
+        <Route
           path="/courses"
           element={
             <PrivateRoute>
@@ -39,6 +50,17 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        {/* ✅ Thêm route Course Detail */}
+        <Route
+          path="/courses/:id"
+          element={
+            <PrivateRoute>
+              <CourseDetail />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/analytics"
           element={
@@ -47,6 +69,7 @@ function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/learning"
           element={
@@ -55,6 +78,7 @@ function App() {
             </PrivateRoute>
           }
         />
+
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>
