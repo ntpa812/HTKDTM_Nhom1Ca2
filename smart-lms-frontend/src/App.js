@@ -5,7 +5,8 @@ import Dashboard from './pages/Dashboard';
 import Courses from './pages/Courses';
 import Analytics from './pages/Analytics';
 import LearningPath from './pages/LearningPath';
-import CourseDetail from './CourseDetail';   // ✅ thêm import
+import CourseDetail from './CourseDetail';
+import CourseSearchFilter from './CourseSearchFilter';
 
 function App() {
   const isAuthenticated = () => {
@@ -29,6 +30,15 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/courses/search"
+          element={
+            <PrivateRoute>
+              <CourseSearchFilter />
+            </PrivateRoute>
+          }
+        />
+
 
         <Route
           path="/courses"
