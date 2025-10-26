@@ -5,6 +5,8 @@ import DashboardRouter from './pages/DashboardRouter';  // Thêm import
 import Courses from './pages/Courses';
 import Analytics from './pages/Analytics';
 import LearningPath from './pages/LearningPath';
+import InstructorLearningPaths from './pages/InstructorLearningPaths';
+import CreateLearningPath from './pages/CreateLearningPath';
 
 function App() {
   const isAuthenticated = () => {
@@ -52,6 +54,22 @@ function App() {
           element={
             <PrivateRoute>
               <LearningPath />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/instructor/learning-paths"
+          element={
+            <PrivateRoute>
+              <InstructorLearningPaths />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/create-path"
+          element={
+            <PrivateRoute>
+              <CreateLearningPath />
             </PrivateRoute>
           }
         />

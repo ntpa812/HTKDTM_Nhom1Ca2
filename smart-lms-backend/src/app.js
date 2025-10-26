@@ -58,7 +58,10 @@ app.use('/api', apiRoutes);
 
 const dashboardRoutes = require('./routes/dashboard');
 app.use('/api/dashboard', dashboardRoutes);
-
+// smart-lms-backend/src/app.js
+app.use('/api/paths', require('./routes/learningPaths'));
+app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/courses', require('./routes/courses'));
 
 // ============================================
 // ERROR HANDLERS
