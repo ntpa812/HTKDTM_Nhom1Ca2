@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Courses from './pages/Courses';
 import Analytics from './pages/Analytics';
 import LearningPath from './pages/LearningPath';
+import CourseDetail from './CourseDetail';   // ✅ thêm import
 
 function App() {
   const isAuthenticated = () => {
@@ -19,6 +20,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+
         <Route
           path="/dashboard"
           element={
@@ -27,6 +29,7 @@ function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/courses"
           element={
@@ -35,6 +38,17 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        {/* ✅ Thêm route Course Detail */}
+        <Route
+          path="/courses/:id"
+          element={
+            <PrivateRoute>
+              <CourseDetail />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/analytics"
           element={
@@ -43,6 +57,7 @@ function App() {
             </PrivateRoute>
           }
         />
+
         <Route
           path="/learning"
           element={
@@ -51,6 +66,7 @@ function App() {
             </PrivateRoute>
           }
         />
+
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </Router>
