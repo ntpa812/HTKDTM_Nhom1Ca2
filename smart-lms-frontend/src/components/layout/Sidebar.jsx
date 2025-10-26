@@ -19,7 +19,12 @@ function Sidebar({ user, onLogout }) {
     return (
         <aside style={styles.sidebar}>
             <div style={styles.sidebarHeader}>
-                <h1 style={styles.logo}>Smart LMS</h1>
+                <h1
+                    style={styles.logo}
+                    onClick={() => navigate('/dashboard')}
+                >
+                    Smart LMS
+                </h1>
             </div>
 
             <nav style={styles.nav}>
@@ -80,7 +85,8 @@ const styles = {
         fontSize: '24px',
         fontWeight: '700',
         margin: 0,
-        cursor: 'pointer'
+        cursor: 'pointer',
+        transition: 'opacity 0.3s ease'
     },
     nav: {
         flex: 1,
@@ -106,12 +112,14 @@ const styles = {
         textAlign: 'left'
     },
     menuItemActive: {
-        background: 'rgba(255, 255, 255, 0.15)',
+        background: 'rgba(255, 255, 255, 0.2)',
         color: 'white',
-        fontWeight: '600'
+        fontWeight: '600',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
     },
     menuIcon: {
-        fontSize: '20px'
+        fontSize: '20px',
+        minWidth: '20px'
     },
     menuLabel: {
         flex: 1
@@ -124,7 +132,10 @@ const styles = {
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
-        marginBottom: '16px'
+        marginBottom: '16px',
+        padding: '8px',
+        borderRadius: '12px',
+        transition: 'background 0.3s ease'
     },
     userAvatar: {
         width: '40px',
@@ -136,16 +147,21 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         fontSize: '18px',
-        fontWeight: '700'
+        fontWeight: '700',
+        flexShrink: 0
     },
     userInfo: {
-        flex: 1
+        flex: 1,
+        minWidth: 0
     },
     userName: {
         color: 'white',
         fontSize: '14px',
         fontWeight: '600',
-        margin: '0 0 4px 0'
+        margin: '0 0 4px 0',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap'
     },
     userRole: {
         color: 'rgba(255, 255, 255, 0.7)',

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import Sidebar from '../components/layout/Sidebar';
 
 function Dashboard() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [activeMenu, setActiveMenu] = useState('dashboard');
     const navigate = useNavigate();
 
-    // Mock data
+    // Mock data (giữ nguyên)
     const progressData = [
         { name: 'T1', progress: 30 },
         { name: 'T2', progress: 45 },
@@ -27,15 +27,6 @@ function Dashboard() {
         { id: 1, title: 'Deep Learning cơ bản', difficulty: 'Trung bình', match: 92 },
         { id: 2, title: 'Python nâng cao', difficulty: 'Khó', match: 88 },
         { id: 3, title: 'Data Structures', difficulty: 'Dễ', match: 85 },
-    ];
-
-    const menuItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-        { id: 'courses', label: 'Khóa học', icon: '📚' },
-        { id: 'progress', label: 'Tiến độ', icon: '📈' },
-        { id: 'analytics', label: 'Thống kê', icon: '📉' },
-        { id: 'ai', label: 'AI Assistant', icon: '🤖' },
-        { id: 'settings', label: 'Cài đặt', icon: '⚙️' },
     ];
 
     useEffect(() => {
@@ -71,45 +62,10 @@ function Dashboard() {
 
     return (
         <div style={styles.container}>
-            {/* Sidebar */}
-            <aside style={styles.sidebar}>
-                <div style={styles.sidebarHeader}>
-                    <h1 style={styles.sidebarLogo}>Smart LMS</h1>
-                </div>
+            {/* Sidebar Component */}
+            <Sidebar user={user} onLogout={handleLogout} />
 
-                <nav style={styles.nav}>
-                    {menuItems.map((item) => (
-                        <button
-                            key={item.id}
-                            onClick={() => setActiveMenu(item.id)}
-                            style={{
-                                ...styles.menuItem,
-                                ...(activeMenu === item.id ? styles.menuItemActive : {})
-                            }}
-                        >
-                            <span style={styles.menuIcon}>{item.icon}</span>
-                            <span style={styles.menuLabel}>{item.label}</span>
-                        </button>
-                    ))}
-                </nav>
-
-                <div style={styles.sidebarFooter}>
-                    <div style={styles.userProfile}>
-                        <div style={styles.userAvatar}>
-                            {user?.full_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
-                        </div>
-                        <div style={styles.userInfo}>
-                            <p style={styles.userNameSidebar}>{user?.full_name || user?.username}</p>
-                            <p style={styles.userRole}>{user?.role === 'student' ? 'Học viên' : 'Quản trị'}</p>
-                        </div>
-                    </div>
-                    <button onClick={handleLogout} style={styles.logoutBtnSidebar}>
-                        🚪 Đăng xuất
-                    </button>
-                </div>
-            </aside>
-
-            {/* Main Content */}
+            {/* Main Content - giữ nguyên code cũ */}
             <main style={styles.mainContent}>
                 {/* Header */}
                 <header style={styles.header}>
@@ -193,7 +149,7 @@ function Dashboard() {
     );
 }
 
-// StatCard Component
+// StatCard Component - giữ nguyên
 const StatCard = ({ title, value, change, color }) => (
     <div style={styles.statCard}>
         <div style={{ ...styles.statIcon, backgroundColor: color }}>
@@ -209,6 +165,7 @@ const StatCard = ({ title, value, change, color }) => (
     </div>
 );
 
+// Styles - giữ nguyên tất cả styles cũ (bỏ qua sidebar styles vì đã move sang component)
 const styles = {
     container: {
         display: 'flex',
@@ -224,110 +181,6 @@ const styles = {
         fontSize: '24px',
         fontWeight: '600'
     },
-    // Sidebar styles
-    sidebar: {
-        width: '280px',
-        background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        boxShadow: '4px 0 20px rgba(0, 0, 0, 0.1)',
-        position: 'fixed',
-        height: '100vh',
-        left: 0,
-        top: 0
-    },
-    sidebarHeader: {
-        padding: '32px 24px',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.1)'
-    },
-    sidebarLogo: {
-        color: 'white',
-        fontSize: '24px',
-        fontWeight: '700',
-        margin: 0
-    },
-    nav: {
-        flex: 1,
-        padding: '24px 16px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px'
-    },
-    menuItem: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        padding: '14px 16px',
-        background: 'transparent',
-        border: 'none',
-        borderRadius: '12px',
-        color: 'rgba(255, 255, 255, 0.7)',
-        fontSize: '15px',
-        fontWeight: '500',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        textAlign: 'left'
-    },
-    menuItemActive: {
-        background: 'rgba(255, 255, 255, 0.15)',
-        color: 'white',
-        fontWeight: '600'
-    },
-    menuIcon: {
-        fontSize: '20px'
-    },
-    menuLabel: {
-        flex: 1
-    },
-    sidebarFooter: {
-        padding: '24px',
-        borderTop: '1px solid rgba(255, 255, 255, 0.1)'
-    },
-    userProfile: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-        marginBottom: '16px'
-    },
-    userAvatar: {
-        width: '40px',
-        height: '40px',
-        borderRadius: '50%',
-        background: 'white',
-        color: '#667eea',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '18px',
-        fontWeight: '700'
-    },
-    userInfo: {
-        flex: 1
-    },
-    userNameSidebar: {
-        color: 'white',
-        fontSize: '14px',
-        fontWeight: '600',
-        margin: '0 0 4px 0'
-    },
-    userRole: {
-        color: 'rgba(255, 255, 255, 0.7)',
-        fontSize: '12px',
-        margin: 0
-    },
-    logoutBtnSidebar: {
-        width: '100%',
-        padding: '12px',
-        background: 'rgba(255, 255, 255, 0.15)',
-        border: 'none',
-        borderRadius: '8px',
-        color: 'white',
-        fontSize: '14px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease'
-    },
-    // Main content styles
     mainContent: {
         flex: 1,
         marginLeft: '280px',
@@ -370,6 +223,7 @@ const styles = {
         padding: '32px 40px',
         overflowY: 'auto'
     },
+    // ... giữ nguyên tất cả các styles còn lại từ code cũ
     statsGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
