@@ -6,6 +6,9 @@ import Courses from './pages/Courses';
 import Analytics from './pages/Analytics';
 import LearningPath from './pages/LearningPath';
 
+import InstructorDashboard from './pages/InstructorDashboard';
+import AdminDashboard from './pages/AdminDashboard';
+
 function App() {
   const isAuthenticated = () => {
     return localStorage.getItem('token') !== null;
@@ -19,14 +22,9 @@ function App() {
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/instructor-dashboard" element={<InstructorDashboard />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route
           path="/courses"
           element={
