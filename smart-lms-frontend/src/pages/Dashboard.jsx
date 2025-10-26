@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Sidebar from '../components/layout/Sidebar';
 import RecentActivities from '../components/dashboard/RecentActivities';
@@ -12,29 +13,16 @@ function Dashboard() {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    // Mock data
-    const progressData = [
-        { name: 'T1', progress: 30 },
-        { name: 'T2', progress: 45 },
-        { name: 'T3', progress: 60 },
-        { name: 'T4', progress: 75 },
-    ];
-
-    const knowledgeGapData = [
-        { subject: 'Toán', mastery: 85, gap: 15 },
-        { subject: 'Lập trình', mastery: 70, gap: 30 },
-        { subject: 'CSDL', mastery: 90, gap: 10 },
-        { subject: 'AI/ML', mastery: 60, gap: 40 },
-    ];
-
-    const recommendedCourses = [
-        { id: 1, title: 'Deep Learning cơ bản', difficulty: 'Trung bình', match: 92 },
-        { id: 2, title: 'Python nâng cao', difficulty: 'Khó', match: 88 },
-        { id: 3, title: 'Data Structures', difficulty: 'Dễ', match: 85 },
-    ];
+    const [dashboardData, setDashboardData] = useState({
+        stats: null,
+        progressData: [],
+        knowledgeGapData: [],
+        recommendedCourses: []
+    });
 
     useEffect(() => {
         loadUserData();
+        loadDashboardData();
     }, []);
 
     const loadUserData = async () => {
@@ -45,10 +33,44 @@ function Dashboard() {
             }
         } catch (error) {
             console.error('Error loading user data:', error);
+        }
+    };
+
+    const loadDashboardData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            console.log('🔑 Token:', token); // CHECK TOKEN
+
+            const headers = { Authorization: `Bearer ${token}` };
+
+            console.log('📡 Fetching dashboard data...'); // START FETCH
+
+            const [statsRes, progressRes, knowledgeRes, recommendRes] = await Promise.all([
+                axios.get('http://localhost:5000/api/dashboard/stats', { headers }),
+                axios.get('http://localhost:5000/api/dashboard/progress', { headers }),
+                axios.get('http://localhost:5000/api/dashboard/knowledge-gap', { headers }),
+                axios.get('http://localhost:5000/api/dashboard/recommendations', { headers })
+            ]);
+
+            console.log('✅ Stats:', statsRes.data); // CHECK RESPONSE
+            console.log('✅ Progress:', progressRes.data);
+            console.log('✅ Knowledge Gap:', knowledgeRes.data);
+            console.log('✅ Recommendations:', recommendRes.data);
+
+            setDashboardData({
+                stats: statsRes.data.data,
+                progressData: progressRes.data.data,
+                knowledgeGapData: knowledgeRes.data.data,
+                recommendedCourses: recommendRes.data.data
+            });
+        } catch (error) {
+            console.error('❌ Error loading dashboard data:', error.response || error);
+            // Fallback to mock data...
         } finally {
             setLoading(false);
         }
     };
+
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -69,7 +91,6 @@ function Dashboard() {
             <Sidebar user={user} onLogout={handleLogout} />
 
             <main className="dashboard-main-content">
-                {/* Header */}
                 <header className="dashboard-header">
                     <div>
                         <h2 className="dashboard-page-title">Dashboard</h2>
@@ -82,24 +103,40 @@ function Dashboard() {
                     </div>
                 </header>
 
-                {/* Content */}
                 <div className="dashboard-content">
-                    {/* Stats Cards */}
                     <div className="dashboard-stats-grid">
-                        <StatCard title="Khóa học đang học" value="5" change="+2" color="#667eea" />
-                        <StatCard title="Bài tập hoàn thành" value="24" change="+8" color="#10B981" />
-                        <StatCard title="Điểm trung bình" value="8.5" change="+0.3" color="#764ba2" />
-                        <StatCard title="Thời gian học" value="42h" change="+12h" color="#F59E0B" />
+                        <StatCard
+                            title="Khóa học đang học"
+                            value={dashboardData.stats?.activeEnrollments || "0"}
+                            change="+2"
+                            color="#667eea"
+                        />
+                        <StatCard
+                            title="Bài tập hoàn thành"
+                            value={dashboardData.stats?.completedAssignments || "0"}
+                            change="+8"
+                            color="#10B981"
+                        />
+                        <StatCard
+                            title="Điểm trung bình"
+                            value={dashboardData.stats?.averageScore || "0"}
+                            change="+0.3"
+                            color="#764ba2"
+                        />
+                        <StatCard
+                            title="Thời gian học"
+                            value={dashboardData.stats?.totalStudyTime || "0h"}
+                            change="+12h"
+                            color="#F59E0B"
+                        />
                     </div>
 
-                    {/* Charts/Performance + Deadlines/AI Courses/Activities */}
                     <div className="dashboard-main-grid">
-                        {/* Left Column - Charts + Performance Metrics */}
                         <div className="dashboard-charts-column">
                             <div className="dashboard-chart-card">
                                 <h3 className="dashboard-chart-title">📈 Tiến độ học tập</h3>
                                 <ResponsiveContainer width="100%" height={250}>
-                                    <LineChart data={progressData}>
+                                    <LineChart data={dashboardData.progressData}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e8eaff" />
                                         <XAxis dataKey="name" stroke="#667eea" />
                                         <YAxis stroke="#667eea" />
@@ -113,7 +150,7 @@ function Dashboard() {
                             <div className="dashboard-chart-card">
                                 <h3 className="dashboard-chart-title">🎯 Phân tích lỗ hổng kiến thức</h3>
                                 <ResponsiveContainer width="100%" height={250}>
-                                    <BarChart data={knowledgeGapData}>
+                                    <BarChart data={dashboardData.knowledgeGapData}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e8eaff" />
                                         <XAxis dataKey="subject" stroke="#667eea" />
                                         <YAxis stroke="#667eea" />
@@ -128,16 +165,13 @@ function Dashboard() {
                             <PerformanceMetrics />
                         </div>
 
-                        {/* Right Column - REORDERED: Deadlines → AI Courses → Activities */}
                         <div className="dashboard-activities-column">
-                            {/* 1. Deadline sắp tới */}
                             <UpcomingDeadlines />
 
-                            {/* 2. Khóa học được đề xuất bởi AI */}
                             <div className="dashboard-recommend-card">
                                 <h3 className="dashboard-recommend-title">🤖 Khóa học được đề xuất (AI)</h3>
                                 <div className="dashboard-courses-list">
-                                    {recommendedCourses.map((course) => (
+                                    {dashboardData.recommendedCourses.map((course) => (
                                         <div key={course.id} className="dashboard-course-item">
                                             <div className="dashboard-course-info">
                                                 <h4 className="dashboard-course-title">{course.title}</h4>
@@ -155,7 +189,6 @@ function Dashboard() {
                                 </div>
                             </div>
 
-                            {/* 3. Hoạt động gần đây */}
                             <RecentActivities />
                         </div>
                     </div>
@@ -165,7 +198,6 @@ function Dashboard() {
     );
 }
 
-// StatCard Component
 const StatCard = ({ title, value, change, color }) => (
     <div className="dashboard-stat-card">
         <div className="dashboard-stat-icon" style={{ backgroundColor: color }}>
