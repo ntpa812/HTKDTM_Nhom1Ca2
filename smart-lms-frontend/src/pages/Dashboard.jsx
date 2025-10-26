@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Sidebar from '../components/layout/Sidebar';
+import RecentActivities from '../components/RecentActivities';
 
 function Dashboard() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    // Mock data (giữ nguyên)
+    // Mock data
     const progressData = [
         { name: 'T1', progress: 30 },
         { name: 'T2', progress: 45 },
@@ -62,10 +63,8 @@ function Dashboard() {
 
     return (
         <div style={styles.container}>
-            {/* Sidebar Component */}
             <Sidebar user={user} onLogout={handleLogout} />
 
-            {/* Main Content - giữ nguyên code cũ */}
             <main style={styles.mainContent}>
                 {/* Header */}
                 <header style={styles.header}>
@@ -90,35 +89,43 @@ function Dashboard() {
                         <StatCard title="Thời gian học" value="42h" change="+12h" color="#F59E0B" />
                     </div>
 
-                    {/* Charts */}
-                    <div style={styles.chartsGrid}>
-                        <div style={styles.chartCard}>
-                            <h3 style={styles.chartTitle}>📈 Tiến độ học tập</h3>
-                            <ResponsiveContainer width="100%" height={250}>
-                                <LineChart data={progressData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e8eaff" />
-                                    <XAxis dataKey="name" stroke="#667eea" />
-                                    <YAxis stroke="#667eea" />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Line type="monotone" dataKey="progress" stroke="#667eea" strokeWidth={3} name="Tiến độ (%)" />
-                                </LineChart>
-                            </ResponsiveContainer>
+                    {/* Charts + Recent Activities Grid */}
+                    <div style={styles.mainGrid}>
+                        {/* Left Column - Charts */}
+                        <div style={styles.chartsColumn}>
+                            <div style={styles.chartCard}>
+                                <h3 style={styles.chartTitle}>📈 Tiến độ học tập</h3>
+                                <ResponsiveContainer width="100%" height={250}>
+                                    <LineChart data={progressData}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e8eaff" />
+                                        <XAxis dataKey="name" stroke="#667eea" />
+                                        <YAxis stroke="#667eea" />
+                                        <Tooltip />
+                                        <Legend />
+                                        <Line type="monotone" dataKey="progress" stroke="#667eea" strokeWidth={3} name="Tiến độ (%)" />
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+
+                            <div style={styles.chartCard}>
+                                <h3 style={styles.chartTitle}>🎯 Phân tích lỗ hổng kiến thức</h3>
+                                <ResponsiveContainer width="100%" height={250}>
+                                    <BarChart data={knowledgeGapData}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e8eaff" />
+                                        <XAxis dataKey="subject" stroke="#667eea" />
+                                        <YAxis stroke="#667eea" />
+                                        <Tooltip />
+                                        <Legend />
+                                        <Bar dataKey="mastery" fill="#10B981" name="Mức độ thành thạo" />
+                                        <Bar dataKey="gap" fill="#EF4444" name="Lỗ hổng" />
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
 
-                        <div style={styles.chartCard}>
-                            <h3 style={styles.chartTitle}>🎯 Phân tích lỗ hổng kiến thức</h3>
-                            <ResponsiveContainer width="100%" height={250}>
-                                <BarChart data={knowledgeGapData}>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#e8eaff" />
-                                    <XAxis dataKey="subject" stroke="#667eea" />
-                                    <YAxis stroke="#667eea" />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Bar dataKey="mastery" fill="#10B981" name="Mức độ thành thạo" />
-                                    <Bar dataKey="gap" fill="#EF4444" name="Lỗ hổng" />
-                                </BarChart>
-                            </ResponsiveContainer>
+                        {/* Right Column - Recent Activities */}
+                        <div style={styles.activitiesColumn}>
+                            <RecentActivities />
                         </div>
                     </div>
 
@@ -149,7 +156,7 @@ function Dashboard() {
     );
 }
 
-// StatCard Component - giữ nguyên
+// StatCard Component
 const StatCard = ({ title, value, change, color }) => (
     <div style={styles.statCard}>
         <div style={{ ...styles.statIcon, backgroundColor: color }}>
@@ -165,7 +172,7 @@ const StatCard = ({ title, value, change, color }) => (
     </div>
 );
 
-// Styles - giữ nguyên tất cả styles cũ (bỏ qua sidebar styles vì đã move sang component)
+// Styles
 const styles = {
     container: {
         display: 'flex',
@@ -223,7 +230,6 @@ const styles = {
         padding: '32px 40px',
         overflowY: 'auto'
     },
-    // ... giữ nguyên tất cả các styles còn lại từ code cũ
     statsGrid: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -273,11 +279,21 @@ const styles = {
         fontSize: '14px',
         fontWeight: '600'
     },
-    chartsGrid: {
+    // NEW: Main grid for charts + activities
+    mainGrid: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
+        gridTemplateColumns: '2fr 1fr',
         gap: '24px',
         marginBottom: '32px'
+    },
+    chartsColumn: {
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '24px'
+    },
+    activitiesColumn: {
+        display: 'flex',
+        flexDirection: 'column'
     },
     chartCard: {
         background: 'white',

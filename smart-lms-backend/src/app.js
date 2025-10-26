@@ -56,6 +56,10 @@ app.get('/api/test-db', async (req, res) => {
 const apiRoutes = require('./routes');
 app.use('/api', apiRoutes);
 
+const dashboardRoutes = require('./routes/dashboard');
+app.use('/api/dashboard', dashboardRoutes);
+
+
 // ============================================
 // ERROR HANDLERS
 // ============================================
