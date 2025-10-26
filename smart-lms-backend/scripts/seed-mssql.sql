@@ -1184,3 +1184,88 @@ ORDER BY
     AVG_PROGRESS DESC;
 
 GO
+
+-- =============================================
+-- Sample Enrollments
+INSERT INTO ENROLLMENTS (
+    STUDENT_ID,
+    COURSE_ID,
+    STATUS,
+    PROGRESS,
+    CREATED_AT,
+    UPDATED_AT
+) VALUES (
+    1,
+    1,
+    'active',
+    45,
+    GETDATE(),
+    GETDATE()
+),
+(
+    1,
+    2,
+    'active',
+    70,
+    GETDATE(),
+    GETDATE()
+),
+(
+    1,
+    3,
+    'active',
+    30,
+    GETDATE(),
+    GETDATE()
+);
+
+-- Sample Quiz Attempts
+INSERT INTO QUIZATTEMPTS (
+    QUIZ_ID,
+    STUDENT_ID,
+    SCORE,
+    COMPLETED_AT,
+    CREATED_AT
+) VALUES (
+    1,
+    1,
+    85,
+    GETDATE(),
+    GETDATE()
+),
+(
+    2,
+    1,
+    90,
+    GETDATE(),
+    GETDATE()
+),
+(
+    3,
+    1,
+    75,
+    GETDATE(),
+    GETDATE()
+);
+
+-- Sample Assignment Submissions
+INSERT INTO ASSIGNMENTSUBMISSIONS (
+    ASSIGNMENT_ID,
+    STUDENT_ID,
+    STATUS,
+    SUBMITTED_AT,
+    CREATED_AT
+) VALUES (
+    1,
+    1,
+    'submitted',
+    GETDATE(),
+    GETDATE()
+),
+(
+    2,
+    1,
+    'submitted',
+    GETDATE(),
+    GETDATE()
+);
