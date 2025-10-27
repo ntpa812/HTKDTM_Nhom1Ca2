@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import SearchBar from "./SearchBar";
 import FilterPanel from "./FilterPanel";
-import CourseCard from "./CourseCard";
+import CourseCard from "../common/CourseCard";
 
-// ============================
-// 🚀 Fake Data để test nhanh
-// ============================
+
+
+// 🚀 Fake Data
 const fakeCourses = [
   {
     id: 1,
@@ -44,33 +44,11 @@ export default function CourseSearchFilter() {
   const [sort, setSort] = useState("Newest");
   const [results, setResults] = useState([]);
 
-  // ==================================
-  // ✅ Lấy dữ liệu (fake hoặc thật)
-  // ==================================
   useEffect(() => {
-    // 👉 Nếu có backend thật thì bật đoạn dưới:
-    /*
-    fetch("http://localhost:5000/api/courses", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`, // nếu API cần token
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        setCourses(data);
-        setResults(data);
-      })
-      .catch((err) => console.error("Error fetching courses:", err));
-    */
-
-    // 🚧 Tạm thời dùng fake data để test UI
     setCourses(fakeCourses);
     setResults(fakeCourses);
   }, []);
 
-  // ==================================
-  // Filter + Sort
-  // ==================================
   useEffect(() => {
     let filtered = courses.filter((course) => {
       const text = (
@@ -111,9 +89,6 @@ export default function CourseSearchFilter() {
     setResults(filtered);
   }, [query, filters, sort, courses]);
 
-  // ==================================
-  // Render
-  // ==================================
   return (
     <div className="p-6 space-y-6">
       <SearchBar value={query} onChange={setQuery} data={courses} />

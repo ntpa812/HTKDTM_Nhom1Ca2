@@ -5,8 +5,10 @@ import DashboardRouter from './pages/DashboardRouter';  // Thêm import
 import Courses from './pages/Courses';
 import Analytics from './pages/Analytics';
 import LearningPath from './pages/LearningPath';
-import CourseDetail from './CourseDetail';
-import CourseSearchFilter from './CourseSearchFilter';
+import CourseDetail from './components/CourseDetail/index.jsx';
+import CourseSearchFilter from './components/CourseSearchFilter/index.jsx';
+import CourseCategories from './components/CourseCategories/index.jsx';
+
 
 function App() {
   const isAuthenticated = () => {
@@ -75,6 +77,22 @@ function App() {
           element={
             <PrivateRoute>
               <LearningPath />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/categories/:category"
+          element={
+            <PrivateRoute>
+              <CourseCategories />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/categories"
+          element={
+            <PrivateRoute>
+              <CourseCategories />
             </PrivateRoute>
           }
         />
