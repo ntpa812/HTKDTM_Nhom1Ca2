@@ -10,6 +10,7 @@ function Sidebar({ user, onLogout }) {
         { id: 'courses', label: 'Khóa học', icon: '📚', path: '/courses' },
         { id: 'learning', label: 'Học tập', icon: '📖', path: '/learning' },
         { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
+        { id: 'richtext', label: 'Rich Text Editor', icon: '📄', path: '/rich-text-editor' }, // Mục mới
         { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },
         { id: 'settings', label: 'Cài đặt', icon: '⚙️', path: '/settings' },
     ];

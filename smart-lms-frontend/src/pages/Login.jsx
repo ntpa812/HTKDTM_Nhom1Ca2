@@ -13,9 +13,43 @@ function Login() {
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
+        console.log("Fake login env:", process.env.REACT_APP_FAKE_LOGIN);
+        console.log("Token in localStorage after fake login:", localStorage.getItem("token"));
         e.preventDefault();
         setError('');
         setLoading(true);
+
+        
+                // 🧪 Fake login (chỉ chạy trên máy bạn nếu có REACT_APP_FAKE_LOGIN=true)
+        if (process.env.REACT_APP_FAKE_LOGIN === "true") {
+            console.log("🧪 Fake login enabled (local only)");
+
+            const fakeAccounts = [
+                { email: "student01@test.com", password: "password123", role: "student" },
+                { email: "instructor1@smartlms.com", password: "password123", role: "instructor" },
+                { email: "admin@smartlms.com", password: "admin123", role: "admin" }
+            ];
+
+            const match = fakeAccounts.find(
+                (acc) => acc.email === email && acc.password === password
+            );
+
+            if (match) {
+                localStorage.setItem("token", "fake-token");
+                localStorage.setItem(
+                    "user",
+                    JSON.stringify({ email: match.email, role: match.role })
+                );
+                navigate("/dashboard");
+                setLoading(false);
+                return; // 👉 Dừng lại, không gọi backend
+            } else {
+                setError("Sai email hoặc mật khẩu (fake login).");
+                setLoading(false);
+                return;
+            }
+        }
+
 
         try {
             const response = await axios.post(`${API_BASE_URL}/auth/login`, {
