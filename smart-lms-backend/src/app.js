@@ -1,3 +1,4 @@
+// smart-lms-backend/src/app.js
 require('dotenv').config();
 
 const express = require('express');
@@ -36,16 +37,19 @@ app.get('/', (req, res) => {
 app.get('/api/test-db', async (req, res) => {
     try {
         const pool = await poolPromise;
-        const result = await pool.request().query('SELECT @@VERSION AS version');
+        const result = await pool.request().query('SELECT COUNT(*) as count FROM LearningPaths');
+
         res.json({
             success: true,
-            message: 'Database connected',
-            version: result.recordset && result.recordset[0] ? result.recordset[0].version : null
+            message: 'Database connection OK',
+            learning_paths_count: result.recordset[0].count,
+            timestamp: new Date().toISOString()
         });
-    } catch (err) {
+    } catch (error) {
         res.status(500).json({
             success: false,
-            error: err.message || err
+            message: 'Database connection failed',
+            error: error.message
         });
     }
 });
@@ -58,22 +62,41 @@ app.use('/api', apiRoutes);
 
 const dashboardRoutes = require('./routes/dashboard');
 app.use('/api/dashboard', dashboardRoutes);
-// smart-lms-backend/src/app.js
-app.use('/api/paths', require('./routes/learningPaths'));
+
+// SỬA: Chỉ giữ 1 route cho learning paths
+app.use('/api/learning-paths', require('./routes/learningPaths'));
+
+// Loại bỏ duplicate
+// app.use('/api/paths', require('./routes/learningPaths')); // XÓA DÒNG NÀY
+
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/courses', require('./routes/courses'));
+
+console.log('✅ All routes registered');
 
 // ============================================
 // ERROR HANDLERS
 // ============================================
 // 404 handler
 app.use((req, res) => {
+    console.log('❌ Route not found:', req.method, req.path);
     res.status(404).json({
         success: false,
         message: 'Route not found',
-        path: req.path
+        method: req.method,
+        path: req.path,
+        available_routes: [
+            'GET /api/test-db',
+            'GET /api/learning-paths',
+            'GET /api/learning-paths/categories',
+            'POST /api/learning-paths/:id/enroll'
+        ]
     });
 });
+
+// Phải có dòng này trong app.js
+app.use('/api/learning-paths', require('./routes/learningPaths'));
+
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -92,6 +115,11 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
     console.log(`✅ Server running on http://localhost:${PORT}`);
+    console.log('📋 Available routes:');
+    console.log('   - GET  /api/test-db');
+    console.log('   - GET  /api/learning-paths');
+    console.log('   - GET  /api/learning-paths/categories');
+    console.log('   - POST /api/learning-paths/:id/enroll');
 });
 
 module.exports = app;

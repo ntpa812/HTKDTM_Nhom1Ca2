@@ -1,109 +1,118 @@
-// smart-lms-backend/src/routes/learningPaths.js
 const express = require('express');
 const router = express.Router();
 const { poolPromise, sql } = require('../../config/database');
-const { authenticateToken, authorizeRole } = require('../middleware/auth');
+const { authenticateToken } = require('../middleware/auth');
 
-// GET /api/paths/courses - lấy danh sách courses để add vào path
-router.get('/courses', authenticateToken, async (req, res) => {
+console.log('🚀 Khởi tạo routes cho Learning Paths...');
+
+// Middleware để log các request đến route này
+router.use((req, res, next) => {
+    console.log(`🛣️  Request đến Learning Paths: ${req.method} ${req.originalUrl}`);
+    next();
+});
+
+// GET /api/learning-paths/test - Route để kiểm tra
+router.get('/test', (req, res) => {
+    console.log('✅ Route test hoạt động!');
+    res.json({
+        success: true,
+        message: 'Route Learning Paths đang hoạt động!',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// GET /api/learning-paths/my-paths - Lấy các learning path của instructor đang đăng nhập
+router.get('/my-paths', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'instructor') {
+        return res.status(403).json({
+            success: false,
+            message: 'Quyền truy cập bị từ chối: Chỉ instructor mới có quyền này.'
+        });
+    }
+
     try {
+        const instructorId = req.user.id;
         const pool = await poolPromise;
-        const result = await pool.request()
-            .query(`
-                SELECT id, title, category, difficulty, duration_hours, instructor_id
-                FROM Courses 
-                WHERE id NOT IN (
-                    SELECT course_id FROM PathCourses WHERE path_id = @pathId
-                )
-                ORDER BY title
-            `);
+        const request = pool.request();
+        request.input('owner_id', sql.Int, instructorId);
 
+        const query = `
+            SELECT 
+                lp.id, lp.title, lp.slug, lp.description, lp.category, lp.difficulty,
+                lp.is_published, lp.created_at, lp.updated_at,
+                (SELECT COUNT(*) FROM PathCourses pc WHERE pc.path_id = lp.id) as courses_count,
+                (SELECT COUNT(*) FROM PathEnrollments pe WHERE pe.path_id = lp.id) as enrollment_count
+            FROM LearningPaths lp
+            WHERE lp.owner_id = @owner_id
+            ORDER BY lp.updated_at DESC;
+        `;
+
+        const result = await request.query(query);
+        console.log(`✅ Lấy thành công ${result.recordset.length} learning paths cho instructor ID: ${instructorId}`);
         res.json({
             success: true,
             data: result.recordset
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Lỗi khi lấy danh sách courses',
-            error: error.message
-        });
+        console.error('❌ Lỗi khi lấy learning paths của instructor:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server khi lấy dữ liệu.', error: error.message });
     }
 });
 
-// POST /api/paths - tạo learning path mới
-router.post('/', authenticateToken, authorizeRole('admin', 'instructor'), async (req, res) => {
+// GET /api/learning-paths/categories - Lấy danh sách các category
+router.get('/categories', async (req, res) => {
     try {
-        const { title, description, category, difficulty, estimated_hours, courses, prerequisites } = req.body;
-        const userId = req.user.id;
-
         const pool = await poolPromise;
-        const transaction = pool.transaction();
-
-        await transaction.begin();
-
-        // 1. Tạo Learning Path
-        const pathResult = await transaction.request()
-            .input('title', sql.NVarChar, title)
-            .input('slug', sql.NVarChar, title.toLowerCase().replace(/[^a-z0-9]/g, '-'))
-            .input('description', sql.NVarChar, description)
-            .input('category', sql.NVarChar, category)
-            .input('difficulty', sql.NVarChar, difficulty)
-            .input('estimated_hours', sql.Int, estimated_hours)
-            .input('owner_id', sql.Int, userId)
-            .query(`
-                INSERT INTO LearningPaths (title, slug, description, category, difficulty, estimated_hours, owner_id)
-                OUTPUT INSERTED.id
-                VALUES (@title, @slug, @description, @category, @difficulty, @estimated_hours, @owner_id)
-            `);
-
-        const pathId = pathResult.recordset[0].id;
-
-        // 2. Add courses với thứ tự
-        for (let i = 0; i < courses.length; i++) {
-            const course = courses[i];
-            await transaction.request()
-                .input('path_id', sql.Int, pathId)
-                .input('course_id', sql.Int, course.id)
-                .input('position', sql.Int, i + 1)
-                .input('min_score_required', sql.Decimal(5, 2), course.min_score_required || null)
-                .input('require_quiz_complete', sql.Bit, course.require_quiz_complete || 0)
-                .input('require_assignments_complete', sql.Bit, course.require_assignments_complete || 0)
-                .query(`
-                    INSERT INTO PathCourses (path_id, course_id, position, min_score_required, require_quiz_complete, require_assignments_complete)
-                    VALUES (@path_id, @course_id, @position, @min_score_required, @require_quiz_complete, @require_assignments_complete)
-                `);
-        }
-
-        // 3. Add prerequisites
-        for (const prereq of prerequisites || []) {
-            await transaction.request()
-                .input('path_id', sql.Int, pathId)
-                .input('course_id', sql.Int, prereq.course_id)
-                .input('prerequisite_course_id', sql.Int, prereq.prerequisite_course_id)
-                .input('min_score_required', sql.Decimal(5, 2), prereq.min_score_required || null)
-                .query(`
-                    INSERT INTO Prerequisites (path_id, course_id, prerequisite_course_id, min_score_required)
-                    VALUES (@path_id, @course_id, @prerequisite_course_id, @min_score_required)
-                `);
-        }
-
-        await transaction.commit();
-
-        res.status(201).json({
-            success: true,
-            message: 'Learning path đã được tạo thành công',
-            data: { id: pathId }
-        });
-
+        const result = await pool.request().query(`
+            SELECT DISTINCT category 
+            FROM LearningPaths 
+            WHERE is_published = 1 AND category IS NOT NULL
+            ORDER BY category;
+        `);
+        const categories = result.recordset.map(row => row.category);
+        console.log(`✅ Lấy thành công ${categories.length} categories.`);
+        res.json({ success: true, data: categories });
     } catch (error) {
-        await transaction.rollback();
-        res.status(500).json({
-            success: false,
-            message: 'Lỗi khi tạo learning path',
-            error: error.message
-        });
+        console.error('❌ Lỗi khi lấy categories:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server khi lấy categories.', error: error.message });
     }
 });
+
+// GET /api/learning-paths - Lấy tất cả learning path đã publish cho student
+router.get('/', async (req, res) => {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT 
+                lp.id, lp.title, lp.description, lp.category, lp.difficulty, lp.estimated_hours,
+                lp.created_at, u.full_name as instructor_name,
+                (SELECT COUNT(*) FROM PathCourses pc WHERE pc.path_id = lp.id) as courses_count,
+                (SELECT COUNT(*) FROM PathEnrollments pe WHERE pe.path_id = lp.id) as enrollment_count,
+                4.5 as avg_rating, -- Mock
+                50 as total_ratings, -- Mock
+                0 as is_enrolled, -- Mock
+                0 as user_progress -- Mock
+            FROM LearningPaths lp
+            LEFT JOIN Users u ON lp.owner_id = u.id
+            WHERE lp.is_published = 1
+            ORDER BY lp.created_at DESC;
+        `);
+
+        console.log(`✅ Lấy thành công ${result.recordset.length} learning paths cho student.`);
+        res.json({
+            success: true,
+            message: 'Lấy danh sách learning paths thành công.',
+            data: {
+                paths: result.recordset,
+                total: result.recordset.length
+            }
+        });
+    } catch (error) {
+        console.error('❌ Lỗi khi lấy danh sách learning paths:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server khi lấy dữ liệu.', error: error.message });
+    }
+});
+
+console.log('✅ Tất cả routes cho Learning Paths đã được tải.');
 
 module.exports = router;

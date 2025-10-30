@@ -1,65 +1,40 @@
-// smart-lms-frontend/src/pages/LearningPath.jsx (cho Student)
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
+import axios from 'axios';
+import './LearningPath.css'; // Import file CSS
+
+const API_BASE_URL = 'http://localhost:5000/api';
 
 function LearningPath() {
     const navigate = useNavigate();
-    const [learningPaths, setLearningPaths] = useState([]);
-    const [filter, setFilter] = useState('all');
-
-    useEffect(() => {
-        // Mock learning paths available for students
-        setLearningPaths([
-            {
-                id: 1,
-                title: "Full-Stack Web Development",
-                description: "Lộ trình từ Frontend đến Backend với React và Node.js",
-                category: "Web Development",
-                difficulty: "Intermediate",
-                coursesCount: 6,
-                enrolledCount: 124,
-                estimatedHours: 180,
-                isEnrolled: true,
-                progress: 65,
-                instructor: "Dr. Nguyễn Văn Minh"
-            },
-            {
-                id: 2,
-                title: "Data Science Fundamentals",
-                description: "Nền tảng Data Science với Python và Machine Learning",
-                category: "Data Science",
-                difficulty: "Beginner",
-                coursesCount: 8,
-                enrolledCount: 89,
-                estimatedHours: 220,
-                isEnrolled: false,
-                progress: 0,
-                instructor: "ThS. Trần Thị Hương"
-            },
-            {
-                id: 3,
-                title: "AI & Machine Learning Advanced",
-                description: "Khóa học nâng cao về AI và Machine Learning",
-                category: "AI/ML",
-                difficulty: "Advanced",
-                coursesCount: 12,
-                enrolledCount: 45,
-                estimatedHours: 350,
-                isEnrolled: false,
-                progress: 0,
-                instructor: "TS. Lê Hoàng Nam"
-            }
-        ]);
-    }, []);
-
-    const filteredPaths = learningPaths.filter(path => {
-        switch (filter) {
-            case 'enrolled': return path.isEnrolled;
-            case 'available': return !path.isEnrolled;
-            default: return true;
-        }
+    const [allPaths, setAllPaths] = useState([]);
+    const [filteredPaths, setFilteredPaths] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [filters, setFilters] = useState({
+        status: 'all',
+        category: 'all',
+        difficulty: 'all',
+        duration: 'all'
     });
+    const [sortBy, setSortBy] = useState('newest');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    const renderStars = (rating) => {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 !== 0;
+        let stars = '';
+
+        for (let i = 0; i < fullStars; i++) {
+            stars += '⭐';
+        }
+        if (hasHalfStar && fullStars < 5) {
+            stars += '⭐';
+        }
+
+        return stars || '⭐⭐⭐⭐⭐';
+    };
 
     const getDifficultyColor = (difficulty) => {
         switch (difficulty) {
@@ -70,291 +45,390 @@ function LearningPath() {
         }
     };
 
-    const handleEnroll = (pathId) => {
-        setLearningPaths(paths =>
-            paths.map(path =>
-                path.id === pathId
-                    ? { ...path, isEnrolled: true, enrolledCount: path.enrolledCount + 1 }
-                    : path
-            )
-        );
+    useEffect(() => {
+        fetchCategories();
+        fetchLearningPaths();
+    }, []);
+
+    useEffect(() => {
+        applyFiltersAndSort();
+    }, [allPaths, filters, sortBy, searchTerm]);
+
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/learning-paths/categories`);
+            if (response.data.success) {
+                setCategories(response.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+            setCategories(['Web Development', 'Data Science', 'AI/ML', 'Mobile Development', 'DevOps', 'Programming']);
+        }
     };
+
+    const fetchLearningPaths = async () => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const config = token ? {
+                headers: { Authorization: `Bearer ${token}` }
+            } : {};
+
+            const response = await axios.get(`${API_BASE_URL}/learning-paths`, config);
+
+            if (response.data.success) {
+                const pathsData = response.data.data.paths.map(path => ({
+                    id: path.id,
+                    title: path.title,
+                    description: path.description,
+                    category: path.category,
+                    difficulty: path.difficulty,
+                    coursesCount: path.courses_count,
+                    enrolledCount: path.enrollment_count,
+                    estimatedHours: path.estimated_hours,
+                    isEnrolled: path.is_enrolled === 1,
+                    progress: Math.round(path.user_progress || 0),
+                    instructor: path.instructor_name,
+                    rating: path.avg_rating,
+                    totalRatings: path.total_ratings,
+                    createdAt: path.created_at,
+                    popularity: path.enrollment_count,
+                    tags: []
+                }));
+
+                setAllPaths(pathsData);
+            }
+        } catch (error) {
+            console.error('Error fetching learning paths:', error);
+            const mockPaths = [
+                {
+                    id: 1,
+                    title: "Full-Stack Web Development",
+                    description: "Lộ trình từ Frontend đến Backend với React và Node.js",
+                    category: "Web Development",
+                    difficulty: "Intermediate",
+                    coursesCount: 6,
+                    enrolledCount: 124,
+                    estimatedHours: 180,
+                    isEnrolled: true,
+                    progress: 65,
+                    instructor: "Dr. Nguyễn Văn Minh",
+                    rating: 4.8,
+                    totalRatings: 87,
+                    createdAt: "2024-10-15",
+                    popularity: 124,
+                    tags: ["React", "Node.js", "JavaScript"]
+                }
+            ];
+            setAllPaths(mockPaths);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const applyFiltersAndSort = () => {
+        let filtered = [...allPaths];
+
+        if (searchTerm) {
+            filtered = filtered.filter(path =>
+                path.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                path.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                path.instructor.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+
+        switch (filters.status) {
+            case 'enrolled':
+                filtered = filtered.filter(path => path.isEnrolled);
+                break;
+            case 'available':
+                filtered = filtered.filter(path => !path.isEnrolled);
+                break;
+            default:
+                break;
+        }
+
+        if (filters.category !== 'all') {
+            filtered = filtered.filter(path => path.category === filters.category);
+        }
+
+        if (filters.difficulty !== 'all') {
+            filtered = filtered.filter(path => path.difficulty === filters.difficulty);
+        }
+
+        switch (filters.duration) {
+            case 'short':
+                filtered = filtered.filter(path => path.estimatedHours <= 100);
+                break;
+            case 'medium':
+                filtered = filtered.filter(path => path.estimatedHours > 100 && path.estimatedHours <= 200);
+                break;
+            case 'long':
+                filtered = filtered.filter(path => path.estimatedHours > 200);
+                break;
+            default:
+                break;
+        }
+
+        switch (sortBy) {
+            case 'newest':
+                filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                break;
+            case 'popular':
+                filtered.sort((a, b) => b.popularity - a.popularity);
+                break;
+            case 'shortest':
+                filtered.sort((a, b) => a.estimatedHours - b.estimatedHours);
+                break;
+            case 'rating':
+                filtered.sort((a, b) => b.rating - a.rating);
+                break;
+            default:
+                break;
+        }
+
+        setFilteredPaths(filtered);
+    };
+
+    const handleEnroll = async (pathId) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Vui lòng đăng nhập để đăng ký learning path');
+                navigate('/login');
+                return;
+            }
+
+            const response = await axios.post(
+                `${API_BASE_URL}/learning-paths/${pathId}/enroll`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (response.data.success) {
+                setAllPaths(paths =>
+                    paths.map(path =>
+                        path.id === pathId
+                            ? { ...path, isEnrolled: true, enrolledCount: path.enrolledCount + 1 }
+                            : path
+                    )
+                );
+                alert('Đăng ký learning path thành công!');
+            }
+        } catch (error) {
+            console.error('Error enrolling:', error);
+            alert('Lỗi khi đăng ký: ' + (error.response?.data?.message || error.message));
+        }
+    };
+
+    const resetFilters = () => {
+        setFilters({
+            status: 'all',
+            category: 'all',
+            difficulty: 'all',
+            duration: 'all'
+        });
+        setSearchTerm('');
+        setSortBy('newest');
+    };
+
+    if (loading) {
+        return (
+            <Layout title="Learning Paths" subtitle="Đang tải dữ liệu...">
+                <div className="loadingContainer">
+                    <div className="loadingSpinner">🔄</div>
+                    <p>Đang tải Learning Paths từ database...</p>
+                </div>
+            </Layout>
+        );
+    }
 
     return (
         <Layout title="Learning Paths" subtitle="Khám phá lộ trình học tập có cấu trúc">
-            <div style={styles.container}>
-                {/* Header */}
-                <div style={styles.header}>
+            <div className="container">
+                <div className="header">
                     <div>
-                        <h2 style={styles.pageTitle}>📚 Learning Paths</h2>
-                        <p style={styles.pageSubtitle}>
-                            Theo dõi lộ trình học tập có cấu trúc để phát triển kỹ năng một cách hiệu quả
+                        <h2 className="pageTitle">📚 Learning Paths</h2>
+                        <p className="pageSubtitle">
+                            Khám phá {allPaths.length} lộ trình học tập có cấu trúc
                         </p>
                     </div>
                 </div>
 
-                {/* Filter Tabs */}
-                <div style={styles.filterTabs}>
-                    <button
-                        style={{ ...styles.tab, ...(filter === 'all' ? styles.activeTab : {}) }}
-                        onClick={() => setFilter('all')}
-                    >
-                        Tất cả ({learningPaths.length})
-                    </button>
-                    <button
-                        style={{ ...styles.tab, ...(filter === 'enrolled' ? styles.activeTab : {}) }}
-                        onClick={() => setFilter('enrolled')}
-                    >
-                        Đã đăng ký ({learningPaths.filter(p => p.isEnrolled).length})
-                    </button>
-                    <button
-                        style={{ ...styles.tab, ...(filter === 'available' ? styles.activeTab : {}) }}
-                        onClick={() => setFilter('available')}
-                    >
-                        Có thể đăng ký ({learningPaths.filter(p => !p.isEnrolled).length})
-                    </button>
+                <div className="filtersSection">
+                    <div className="searchContainer">
+                        <input
+                            type="text"
+                            placeholder="🔍 Tìm kiếm learning path..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="searchInput"
+                        />
+                    </div>
+
+                    <div className="filterControls">
+                        <div className="filterGroup">
+                            <label className="filterLabel">Trạng thái:</label>
+                            <select
+                                value={filters.status}
+                                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                                className="filterSelect"
+                            >
+                                <option value="all">Tất cả</option>
+                                <option value="enrolled">Đã đăng ký</option>
+                                <option value="available">Có thể đăng ký</option>
+                            </select>
+                        </div>
+
+                        <div className="filterGroup">
+                            <label className="filterLabel">Category:</label>
+                            <select
+                                value={filters.category}
+                                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                                className="filterSelect"
+                            >
+                                <option value="all">Tất cả</option>
+                                {categories.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="filterGroup">
+                            <label className="filterLabel">Difficulty:</label>
+                            <select
+                                value={filters.difficulty}
+                                onChange={(e) => setFilters({ ...filters, difficulty: e.target.value })}
+                                className="filterSelect"
+                            >
+                                <option value="all">Tất cả</option>
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate">Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+
+                        <div className="filterGroup">
+                            <label className="filterLabel">Sắp xếp:</label>
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="filterSelect"
+                            >
+                                <option value="newest">Mới nhất</option>
+                                <option value="popular">Phổ biến nhất</option>
+                                <option value="shortest">Thời gian ngắn nhất</option>
+                                <option value="rating">Đánh giá cao nhất</option>
+                            </select>
+                        </div>
+
+                        <button className="resetBtn" onClick={resetFilters}>
+                            🔄 Reset
+                        </button>
+                    </div>
                 </div>
 
-                {/* Learning Paths Grid */}
-                <div style={styles.pathsGrid}>
-                    {filteredPaths.map(path => (
-                        <div key={path.id} style={styles.pathCard}>
-                            <div style={styles.cardHeader}>
-                                <div style={styles.cardTitle}>{path.title}</div>
-                                <div
-                                    style={{
-                                        ...styles.difficultyBadge,
-                                        backgroundColor: getDifficultyColor(path.difficulty)
-                                    }}
-                                >
-                                    {path.difficulty}
-                                </div>
-                            </div>
+                <div className="resultsInfo">
+                    <span>
+                        Hiển thị {filteredPaths.length} trong số {allPaths.length} learning paths
+                    </span>
+                </div>
 
-                            <div style={styles.cardContent}>
-                                <p style={styles.cardDescription}>{path.description}</p>
-
-                                <div style={styles.instructorInfo}>
-                                    👨‍🏫 Instructor: {path.instructor}
+                {filteredPaths.length > 0 ? (
+                    <div className="pathsGrid">
+                        {filteredPaths.map(path => (
+                            <div key={path.id} className="pathCard">
+                                <div className="cardHeader">
+                                    <div className="cardTitle">{path.title}</div>
+                                    <div
+                                        className="difficultyBadge"
+                                        style={{ backgroundColor: getDifficultyColor(path.difficulty) }}
+                                    >
+                                        {path.difficulty}
+                                    </div>
                                 </div>
 
-                                <div style={styles.cardMeta}>
-                                    <div style={styles.metaItem}>📚 {path.coursesCount} courses</div>
-                                    <div style={styles.metaItem}>👥 {path.enrolledCount} enrolled</div>
-                                    <div style={styles.metaItem}>⏱️ {path.estimatedHours}h</div>
-                                    <div style={styles.metaItem}>🏷️ {path.category}</div>
-                                </div>
+                                <div className="cardContent">
+                                    <p className="cardDescription">{path.description}</p>
 
-                                {path.isEnrolled && (
-                                    <div style={styles.progressSection}>
-                                        <div style={styles.progressLabel}>
-                                            Tiến độ: {path.progress}%
+                                    <div className="instructorRow">
+                                        <div className="instructorInfo">
+                                            👨‍🏫 {path.instructor}
                                         </div>
-                                        <div style={styles.progressBar}>
-                                            <div
-                                                style={{
-                                                    ...styles.progressFill,
-                                                    width: `${path.progress}%`
-                                                }}
-                                            />
+                                        <div className="ratingInfo">
+                                            <span className="stars">
+                                                {renderStars(path.rating)}
+                                            </span>
+                                            <span className="ratingText">
+                                                {path.rating} ({path.totalRatings})
+                                            </span>
                                         </div>
                                     </div>
-                                )}
-                            </div>
 
-                            <div style={styles.cardActions}>
-                                <button
-                                    style={styles.detailButton}
-                                    onClick={() => navigate(`/learning-paths/${path.id}`)}
-                                >
-                                    Xem chi tiết
-                                </button>
+                                    <div className="cardMeta">
+                                        <div className="metaItem">📚 {path.coursesCount} courses</div>
+                                        <div className="metaItem">👥 {path.enrolledCount} enrolled</div>
+                                        <div className="metaItem">⏱️ {path.estimatedHours}h</div>
+                                        <div className="metaItem">🏷️ {path.category}</div>
+                                    </div>
 
-                                {!path.isEnrolled ? (
+                                    {path.isEnrolled && path.progress > 0 && (
+                                        <div className="progressSection">
+                                            <div className="progressLabel">
+                                                Tiến độ: {path.progress}%
+                                            </div>
+                                            <div className="progressBar">
+                                                <div
+                                                    className="progressFill"
+                                                    style={{ width: `${path.progress}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="cardActions">
                                     <button
-                                        style={styles.enrollButton}
-                                        onClick={() => handleEnroll(path.id)}
+                                        className="detailButton"
+                                        onClick={() => navigate(`/learning-paths/${path.id}`)}
                                     >
-                                        Đăng ký học
+                                        Xem chi tiết
                                     </button>
-                                ) : (
-                                    <button
-                                        style={styles.continueButton}
-                                        onClick={() => navigate(`/learning-paths/${path.id}/continue`)}
-                                    >
-                                        Tiếp tục học
-                                    </button>
-                                )}
+
+                                    {!path.isEnrolled ? (
+                                        <button
+                                            className="enrollButton"
+                                            onClick={() => handleEnroll(path.id)}
+                                        >
+                                            Đăng ký học
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="continueButton"
+                                            onClick={() => navigate(`/learning-paths/${path.id}/continue`)}
+                                        >
+                                            Tiếp tục học
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="emptyState">
+                        <div className="emptyIcon">🔍</div>
+                        <h3 className="emptyTitle">Không tìm thấy learning path nào</h3>
+                        <p className="emptyText">
+                            Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
+                        </p>
+                        <button className="resetBtn" onClick={resetFilters}>
+                            🔄 Reset bộ lọc
+                        </button>
+                    </div>
+                )}
             </div>
         </Layout>
     );
 }
-
-// ... styles giữ nguyên như trước
-const styles = {
-    container: {
-        maxWidth: '1200px',
-        margin: '0 auto',
-        padding: '0 20px'
-    },
-    header: {
-        marginBottom: '32px'
-    },
-    pageTitle: {
-        fontSize: '28px',
-        fontWeight: '700',
-        color: '#1e293b',
-        margin: '0 0 8px 0'
-    },
-    pageSubtitle: {
-        fontSize: '16px',
-        color: '#64748b',
-        margin: 0,
-        lineHeight: '1.5'
-    },
-    filterTabs: {
-        display: 'flex',
-        gap: '8px',
-        marginBottom: '24px',
-        borderBottom: '2px solid #f1f5f9',
-        paddingBottom: '16px'
-    },
-    tab: {
-        background: 'none',
-        border: 'none',
-        padding: '8px 16px',
-        borderRadius: '8px',
-        color: '#64748b',
-        cursor: 'pointer',
-        fontWeight: '500',
-        transition: 'all 0.2s ease'
-    },
-    activeTab: {
-        background: '#667eea',
-        color: 'white'
-    },
-    pathsGrid: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
-        gap: '24px'
-    },
-    pathCard: {
-        background: 'white',
-        borderRadius: '16px',
-        border: '1px solid #e2e8f0',
-        overflow: 'hidden',
-        transition: 'all 0.2s ease',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-    },
-    cardHeader: {
-        padding: '20px 24px 16px',
-        borderBottom: '1px solid #f1f5f9',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        gap: '16px'
-    },
-    cardTitle: {
-        fontSize: '18px',
-        fontWeight: '700',
-        color: '#1e293b',
-        lineHeight: '1.4',
-        flex: 1
-    },
-    difficultyBadge: {
-        color: 'white',
-        padding: '4px 12px',
-        borderRadius: '20px',
-        fontSize: '12px',
-        fontWeight: '600',
-        textTransform: 'uppercase'
-    },
-    cardContent: {
-        padding: '0 24px 20px'
-    },
-    cardDescription: {
-        color: '#64748b',
-        fontSize: '14px',
-        lineHeight: '1.5',
-        marginBottom: '12px'
-    },
-    instructorInfo: {
-        fontSize: '13px',
-        color: '#667eea',
-        fontWeight: '500',
-        marginBottom: '16px'
-    },
-    cardMeta: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '8px',
-        marginBottom: '16px'
-    },
-    metaItem: {
-        fontSize: '13px',
-        color: '#64748b'
-    },
-    progressSection: {
-        marginTop: '16px'
-    },
-    progressLabel: {
-        fontSize: '12px',
-        color: '#64748b',
-        fontWeight: '500',
-        marginBottom: '6px'
-    },
-    progressBar: {
-        height: '6px',
-        background: '#f1f5f9',
-        borderRadius: '3px',
-        overflow: 'hidden'
-    },
-    progressFill: {
-        height: '100%',
-        background: 'linear-gradient(90deg, #10b981, #059669)',
-        borderRadius: '3px',
-        transition: 'width 0.3s ease'
-    },
-    cardActions: {
-        padding: '16px 24px',
-        background: '#f8fafc',
-        display: 'flex',
-        gap: '12px'
-    },
-    detailButton: {
-        background: 'none',
-        border: '2px solid #e2e8f0',
-        color: '#64748b',
-        padding: '8px 16px',
-        borderRadius: '8px',
-        fontWeight: '500',
-        cursor: 'pointer',
-        flex: 1
-    },
-    enrollButton: {
-        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-        color: 'white',
-        border: 'none',
-        padding: '8px 16px',
-        borderRadius: '8px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        flex: 1
-    },
-    continueButton: {
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        border: 'none',
-        padding: '8px 16px',
-        borderRadius: '8px',
-        fontWeight: '600',
-        cursor: 'pointer',
-        flex: 1
-    }
-};
 
 export default LearningPath;
