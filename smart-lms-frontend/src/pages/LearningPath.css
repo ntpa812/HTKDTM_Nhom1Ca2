@@ -302,3 +302,228 @@
         transform: rotate(360deg);
     }
 }
+
+/* CSS cho khu vực gợi ý */
+.recommendations-section {
+    margin-top: 24px;
+    padding: 24px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #374151;
+    margin: 0 0 20px 0;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* CSS cho khu vực gợi ý - PHIÊN BẢN CẬP NHẬT */
+.recommendations-section {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    /* Thêm khoảng cách với div bên dưới */
+    padding: 24px;
+    background-color: #4338ca;
+    /* Đổi màu nền sang màu tím giống sidebar */
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Cập nhật màu chữ của tiêu đề để nổi bật trên nền tối */
+.recommendations-section .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    /* Đổi màu chữ thành màu trắng */
+    margin: 0 0 20px 0;
+    border-bottom: 2px solid #6366f1;
+    /* Thêm đường kẻ chân cho đẹp hơn */
+    padding-bottom: 10px;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* Thêm style cho card gợi ý trên nền tối (tùy chọn nhưng nên có) */
+.recommendations-card {
+    background-color: #4f46e5;
+    border: 1px solid #6366f1;
+}
+
+.recommendation-section {
+    background: 'linear-gradient(180deg, #667eea 0%, #764ba2 100%)';
+}
+
+.recommendations-section .recommendation-card:hover {
+    border-color: #a5b4fc;
+}
+
+.recommendations-section .card-title {
+    color: #e0e7ff;
+    /* Màu chữ tiêu đề card */
+}
+
+.recommendations-section .card-reasoning {
+    color: #c7d2fe;
+    /* Màu chữ lý do */
+}
+
+.recommendations-section .tags .tag {
+    background-color: #3730a3;
+    color: #e0e7ff;
+}
+
+/* ========================================= */
+/* === CSS CHO KHU VỰC GỢI Ý - BẢN HOÀN CHỈNH === */
+/* ========================================= */
+
+.recommendations-section {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    /* Khoảng cách với div bên dưới */
+    padding: 24px;
+
+    /* Sửa lỗi cú pháp và áp dụng gradient bạn chọn */
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.recommendations-section .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    /* Chữ trắng để nổi bật */
+    margin: 0 0 20px 0;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    /* Đường kẻ chân mờ ảo */
+    padding-bottom: 10px;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* Áp dụng màu cho card như bạn yêu cầu */
+.recommendations-section .recommendation-card {
+    background-color: white;
+    border: 1px solid #6366f1;
+    /* Giữ lại các hiệu ứng khác cho đẹp hơn */
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.recommendations-section .recommendation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-color: #a5b4fc;
+}
+
+.recommendations-section .match-badge {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+}
+
+.recommendations-section .card-title {
+    color: #e0e7ff;
+}
+
+.recommendations-section .card-reasoning {
+    color: #c7d2fe;
+}
+
+.recommendations-section .tags .tag {
+    background-color: #3730a3;
+    color: #e0e7ff;
+}
+
+
+/* ======================================================= */
+/* === CSS KHU VỰC GỢI Ý - CẬP NHẬT THEO YÊU CẦU MỚI === */
+/* ======================================================= */
+
+.recommendations-section {
+    margin-top: 24px;
+    margin-bottom: 24px;
+    padding: 24px;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.recommendations-section .section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 10px;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+/* --- PHẦN CẬP NHẬT CHÍNH --- */
+
+/* 1. Đổi màu nền card thành màu trắng */
+.recommendations-section .recommendation-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.recommendations-section .recommendation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-color: #4f46e5;
+}
+
+/* Giữ lại badge màu tím để tạo điểm nhấn */
+.recommendations-section .match-badge {
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+}
+
+/* 2. Đổi màu chữ tiêu đề của card */
+.recommendations-section .card-title {
+    color: #3730a3;
+}
+
+/* 3. Đổi màu chữ của lý do (dùng màu xám đậm cho dễ đọc) */
+.recommendations-section .card-reasoning {
+    color: #4b5563;
+}
+
+/* 4. Cập nhật lại màu cho tag trên nền trắng */
+.recommendations-section .tags .tag {
+    background-color: #e0e7ff;
+    /* Nền tím nhạt */
+    color: #3730a3;
+    /* Chữ tím đậm */
+}

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/layout/Layout';
 import axios from 'axios';
-import './LearningPath.css'; // Import file CSS
+import './LearningPath.css';
+import RecommendationCard from '../components/common/RecommendationCard';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -45,9 +46,12 @@ function LearningPath() {
         }
     };
 
+    const [recommendations, setRecommendations] = useState([]);
+
     useEffect(() => {
         fetchCategories();
         fetchLearningPaths();
+        fetchRecommendations();
     }, []);
 
     useEffect(() => {
@@ -221,6 +225,22 @@ function LearningPath() {
         }
     };
 
+    const fetchRecommendations = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return; // Không lấy gợi ý nếu chưa đăng nhập
+
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            const response = await axios.get(`${API_BASE_URL}/learning-paths/recommendations`, config);
+
+            if (response.data.success) {
+                setRecommendations(response.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching recommendations:', error);
+        }
+    };
+
     const resetFilters = () => {
         setFilters({
             status: 'all',
@@ -244,16 +264,16 @@ function LearningPath() {
     }
 
     return (
-        <Layout title="Learning Paths" subtitle="Khám phá lộ trình học tập có cấu trúc">
+        <Layout title="Learning Paths">
             <div className="container">
-                <div className="header">
+                {/* <div className="header">
                     <div>
                         <h2 className="pageTitle">📚 Learning Paths</h2>
                         <p className="pageSubtitle">
                             Khám phá {allPaths.length} lộ trình học tập có cấu trúc
                         </p>
                     </div>
-                </div>
+                </div> */}
 
                 <div className="filtersSection">
                     <div className="searchContainer">
@@ -327,6 +347,17 @@ function LearningPath() {
                         </button>
                     </div>
                 </div>
+
+                {recommendations.length > 0 && (
+                    <div className="recommendations-section">
+                        <h3 className="section-title">✨ Gợi ý dành riêng cho bạn</h3>
+                        <div className="recommendations-grid">
+                            {recommendations.map(path => (
+                                <RecommendationCard key={`rec-${path.id}`} path={path} />
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="resultsInfo">
                     <span>
