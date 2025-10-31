@@ -1,25 +1,26 @@
-// smart-lms-frontend/src/App.js
-
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 // Import các pages của bạn
 import Login from './pages/Login';
-import DashboardRouter from './pages/DashboardRouter'; // Component điều hướng dashboard
+import DashboardRouter from './pages/DashboardRouter';
 import LearningPath from './pages/LearningPath';
 import LearningPathDetailPage from './pages/LearningPathDetailPage';
 import InstructorLearningPaths from './pages/InstructorLearningPaths';
-import PrivateRoute from './components/PrivateRoute'; // Component bảo vệ route
+import PrivateRoute from './components/PrivateRoute';
+
+// SỬA LỖI: Thêm import cho trang Courses
+import Courses from './pages/Courses'; // Giả sử component của bạn tên là Courses và nằm ở đây
 
 function App() {
   return (
     <Router>
-      {/* Tất cả các component sử dụng hooks của router phải nằm trong này */}
       <Routes>
-        {/* Các route công khai */}
+        {/* === ROUTE CÔNG KHAI === */}
         <Route path="/login" element={<Login />} />
 
-        {/* Các route được bảo vệ */}
+        {/* === CÁC ROUTE ĐƯỢC BẢO VỆ === */}
+
         <Route
           path="/dashboard"
           element={
@@ -28,6 +29,17 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        {/* SỬA LỖI: Thêm lại route cho trang Khóa học */}
+        <Route
+          path="/courses"
+          element={
+            <PrivateRoute>
+              <Courses />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/learning"
           element={
@@ -36,7 +48,15 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/learning-paths/:id" element={<LearningPathDetailPage />} />
+
+        <Route
+          path="/learning-paths/:id" // Đảm bảo dùng :id như đã thống nhất
+          element={
+            <PrivateRoute>
+              <LearningPathDetailPage />
+            </PrivateRoute>
+          }
+        />
 
         <Route
           path="/instructor/learning-paths"
@@ -47,10 +67,8 @@ function App() {
           }
         />
 
-        {/* Route mặc định, chuyển hướng về dashboard */}
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-
-        {/* Thêm các route khác của bạn ở đây */}
+        {/* === ROUTE MẶC ĐỊNH === */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
       </Routes>
     </Router>
