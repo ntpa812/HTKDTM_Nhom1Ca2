@@ -7,7 +7,141 @@ const { authenticateToken } = require('../middleware/auth');
 // (Các route /my-paths, /categories, / không thay đổi, giữ nguyên như cũ)
 router.get('/my-paths', authenticateToken, async (req, res) => { /*...*/ });
 router.get('/categories', async (req, res) => { /*...*/ });
-router.get('/', async (req, res) => { /*...*/ });
+
+// --- ROUTE GỢI Ý (RECOMMENDATION) ---
+// GET /api/learning-paths/recommendations
+router.get('/recommendations', authenticateToken, async (req, res) => {
+    console.log(`[${new Date().toISOString()}] --- Bắt đầu xử lý request GET /api/learning-paths/recommendations ---`);
+    try {
+        const { id: userId } = req.user;
+        const pool = await poolPromise;
+
+        // 1. Lấy thông tin của người dùng hiện tại
+        const userResult = await pool.request()
+            .input('user_id', sql.Int, userId)
+            .query('SELECT skill_level, career_goal FROM dbo.Users WHERE id = @user_id');
+
+        if (userResult.recordset.length === 0) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
+        }
+        const currentUser = userResult.recordset[0];
+
+        // 2. Lấy tất cả các learning path mà người dùng CHƯA đăng ký
+        const candidatePathsResult = await pool.request()
+            .input('user_id', sql.Int, userId)
+            .query(`
+                SELECT lp.id, lp.title, lp.description, lp.category, lp.difficulty
+                FROM dbo.LearningPaths lp
+                WHERE lp.is_published = 1
+                  AND NOT EXISTS (
+                      SELECT 1 FROM dbo.PathEnrollments pe
+                      WHERE pe.path_id = lp.id AND pe.user_id = @user_id
+                  );
+            `);
+        const candidatePaths = candidatePathsResult.recordset;
+
+        // 3. Tính điểm phù hợp cho từng path
+        const recommendations = candidatePaths.map(path => {
+            let score = 0;
+            let reasons = [];
+
+            // Rule 1: Dựa trên mục tiêu nghề nghiệp (career_goal) - 50 điểm
+            if (currentUser.career_goal && path.category.toLowerCase().includes(currentUser.career_goal.toLowerCase())) {
+                score += 50;
+                reasons.push(`Phù hợp với mục tiêu '${currentUser.career_goal}' của bạn`);
+            }
+
+            // Rule 2: Dựa trên trình độ (skill_level) - 40 điểm
+            const difficultyMap = { 'Beginner': 1, 'Intermediate': 2, 'Advanced': 3 };
+            if (currentUser.skill_level && difficultyMap[currentUser.skill_level] === difficultyMap[path.difficulty]) {
+                score += 40;
+                reasons.push(`Có độ khó '${path.difficulty}' hợp với trình độ của bạn`);
+            }
+
+            // Rule 3: Bonus điểm cho các gợi ý chung - 10 điểm
+            if (score === 0) { // Nếu không có gợi ý nào khớp, đưa ra gợi ý chung
+                reasons.push('Khám phá một lĩnh vực mới');
+                score += 10;
+            }
+
+            return {
+                ...path,
+                matchPercentage: Math.min(score, 100),
+                reasoning: reasons.join('. ') || 'Một gợi ý thú vị dành cho bạn.'
+            };
+        });
+
+        // 4. Sắp xếp và lấy top 3 gợi ý tốt nhất
+        const topRecommendations = recommendations
+            .sort((a, b) => b.matchPercentage - a.matchPercentage)
+            .slice(0, 3);
+
+        console.log(`[${new Date().toISOString()}] ✅ Gợi ý thành công, trả về ${topRecommendations.length} learning paths.`);
+        res.json({ success: true, data: topRecommendations });
+
+    } catch (error) {
+        console.error('❌ Lỗi khi tạo gợi ý learning paths:', error.message);
+        res.status(500).json({ success: false, message: 'Lỗi server khi tạo gợi ý.', error: error.message });
+    }
+});
+
+router.get('/', authenticateToken, async (req, res) => {
+    console.log(`[${new Date().toISOString()}] --- Bắt đầu xử lý request GET /api/learning-paths ---`);
+    try {
+        const { id: userId } = req.user; // Lấy userId từ token đã xác thực
+        const pool = await poolPromise;
+        console.log(`[${new Date().toISOString()}] ✅ Lấy connection pool thành công!`);
+
+        const result = await pool.request()
+            .input('user_id', sql.Int, userId)
+            .query(`
+                SELECT
+                    lp.id,
+                    lp.title,
+                    lp.description,
+                    lp.category,
+                    lp.difficulty,
+                    lp.estimated_hours,
+                    u.full_name as instructor_name,
+                    lp.created_at,
+                    (SELECT COUNT(*) FROM dbo.PathCourses pc WHERE pc.path_id = lp.id) as courses_count,
+                    
+                    -- Sửa lỗi: Dùng đúng bảng và bí danh
+                    (SELECT COUNT(*) FROM dbo.PathEnrollments pe WHERE pe.path_id = lp.id) as enrollment_count,
+                    
+                    -- Sửa lỗi: Dùng CASE WHEN EXISTS để kiểm tra enrollment, cú pháp này an toàn hơn
+                    CASE WHEN EXISTS(SELECT 1 FROM dbo.PathEnrollments pe WHERE pe.path_id = lp.id AND pe.user_id = @user_id)
+                        THEN 1
+                        ELSE 0
+                    END as is_enrolled,
+
+                    (SELECT AVG(CAST(pp.progress AS FLOAT)) FROM dbo.PathProgress pp WHERE pp.path_id = lp.id AND pp.user_id = @user_id) as user_progress
+                FROM
+                    dbo.LearningPaths lp
+                JOIN
+                    dbo.Users u ON lp.owner_id = u.id
+                WHERE
+                    lp.is_published = 1
+                ORDER BY
+                    lp.created_at DESC;
+            `);
+
+        console.log(`[${new Date().toISOString()}] ✅ Truy vấn database thành công, trả về ${result.recordset.length} learning paths.`);
+
+        // Trả về dữ liệu cho frontend
+        res.json({
+            success: true,
+            data: {
+                paths: result.recordset
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Lỗi khi lấy danh sách learning paths:', error.message);
+        res.status(500).json({ success: false, message: 'Lỗi server khi lấy danh sách learning paths.', error: error.message });
+    }
+});
+
 
 // --- ROUTE ĐỘNG (DYNAMIC ROUTE) - ĐÃ ĐƯỢC NÂNG CẤP ---
 // GET /api/learning-paths/:id - Lấy chi tiết một learning path, bao gồm trạng thái khóa học cho user
@@ -82,5 +216,64 @@ router.get('/:id', authenticateToken, async (req, res) => {
         res.status(500).json({ success: false, message: 'Lỗi server khi lấy dữ liệu chi tiết.', error: error.message });
     }
 });
+
+// GET /api/learning-paths/:pathId/my-progress - Lấy thông tin tiến độ tổng quan của user cho một path
+router.get('/:pathId/my-progress', authenticateToken, async (req, res) => {
+    const { pathId } = req.params;
+    const { id: userId } = req.user; // Lấy userId từ token
+
+    try {
+        const pool = await poolPromise;
+
+        // Query 1: Đếm tổng số khóa học trong lộ trình
+        const totalCoursesResult = await pool.request()
+            .input('path_id', sql.Int, pathId)
+            .query('SELECT COUNT(*) as totalCourses FROM PathCourses WHERE path_id = @path_id');
+
+        const totalCourses = totalCoursesResult.recordset[0]?.totalCourses || 0;
+
+        if (totalCourses === 0) {
+            // Nếu lộ trình chưa có khóa học, trả về giá trị 0
+            return res.json({
+                success: true,
+                data: { overallCompletion: 0, coursesCompleted: 0, totalCourses: 0, totalTimeSpent: 0 }
+            });
+        }
+
+        // Query 2: Lấy và tính toán tiến độ của user từ bảng PathProgress
+        const userProgressResult = await pool.request()
+            .input('path_id', sql.Int, pathId)
+            .input('user_id', sql.Int, userId)
+            .query(`
+                SELECT
+                    COUNT(CASE WHEN completed = 1 THEN 1 END) as coursesCompleted,
+                    SUM(time_spent_minutes) as totalTimeSpent
+                FROM PathProgress
+                WHERE path_id = @path_id AND user_id = @user_id;
+            `);
+
+        const progressData = userProgressResult.recordset[0];
+        const coursesCompleted = parseInt(progressData.coursesCompleted) || 0;
+        const totalTimeSpent = parseInt(progressData.totalTimeSpent) || 0;
+
+        // Tính toán phần trăm hoàn thành tổng thể
+        const overallCompletion = totalCourses > 0 ? (coursesCompleted / totalCourses) * 100 : 0;
+
+        const responseData = {
+            overallCompletion: Math.round(overallCompletion),
+            coursesCompleted,
+            totalCourses,
+            totalTimeSpent // Đơn vị: phút
+        };
+
+        res.json({ success: true, data: responseData });
+
+    } catch (error) {
+        console.error('❌ Lỗi khi lấy tiến độ learning path:', error.message);
+        res.status(500).json({ success: false, message: 'Lỗi server khi lấy dữ liệu tiến độ.', error: error.message });
+    }
+});
+
+
 
 module.exports = router;

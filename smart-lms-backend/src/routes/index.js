@@ -1,15 +1,17 @@
 const express = require('express');
 const router = express.Router();
 
+// --- IMPORT CÁC ROUTE ---
 const authRoutes = require('./auth');
 const coursesRoutes = require('./courses');
-// const dashboardRoutes = require('./dashboard'); // ← Make sure this line exists
+const learningPathsRoutes = require('./learningPaths');
 
+// --- SỬ DỤNG CÁC ROUTE ---
 router.use('/auth', authRoutes);
 router.use('/courses', coursesRoutes);
-// router.use('/dashboard', dashboardRoutes); // ← Make sure this line exists
+router.use('/learning-paths', learningPathsRoutes);
 
-// Health check
+// Health check (cập nhật để hiển thị route mới)
 router.get('/health', (req, res) => {
     res.json({
         success: true,
@@ -20,6 +22,8 @@ router.get('/health', (req, res) => {
             '/api/auth/login',
             '/api/auth/register',
             '/api/courses',
+            '/api/learning-paths',
+            '/api/learning-paths/recommendations',
             '/api/progress',
             '/api/users',
             '/api/analytics',
@@ -29,12 +33,12 @@ router.get('/health', (req, res) => {
 });
 
 // Placeholder routes for future features
-router.get('/progress', (req, res) => {
-    res.json({
-        success: true,
-        message: 'Progress endpoint - Coming soon'
-    });
-});
+// router.get('/progress', (req, res) => {
+//     res.json({
+//         success: true,
+//         message: 'Progress endpoint - Coming soon'
+//     });
+// });
 
 router.get('/users', (req, res) => {
     res.json({

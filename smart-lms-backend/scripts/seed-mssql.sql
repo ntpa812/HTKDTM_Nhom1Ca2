@@ -2009,3 +2009,15 @@ DECLARE
         WHERE
             PE.PATH_ID = LP.ID
     ) AS ENROLLED_COUNT FROM LEARNINGPATHS LP JOIN USERS U ON LP.OWNER_ID = U.ID ORDER BY LP.CREATED_AT DESC;
+ 
+    -- Chạy câu lệnh này trên database smart_lms của bạn
+    ALTER  TABLE DBO.USERS ADD SKILL_LEVEL NVARCHAR( 30 ) NULL CHECK ( SKILL_LEVEL IN ('Beginner', 'Intermediate', 'Advanced') ), CAREER_GOAL NVARCHAR( 100 ) NULL;
+    GO    
+ -- (Tùy chọn) Cập nhật dữ liệu mẫu cho một vài user để kiểm thử
+    UPDATE DBO.USERS SET SKILL_LEVEL = 'Beginner', CAREER_GOAL = 'Web Development' WHERE ID = 5;
+ 
+    -- student01
+    UPDATE DBO.USERS SET SKILL_LEVEL = 'Intermediate', CAREER_GOAL = 'AI/ML' WHERE ID = 6;
+ 
+    -- student02
+    GO

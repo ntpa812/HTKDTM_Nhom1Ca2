@@ -1,0 +1,70 @@
+.recommendation-card {
+    display: flex;
+    align-items: center;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.recommendation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border-color: #4f46e5;
+}
+
+.match-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #818cf8);
+    color: white;
+    font-weight: bold;
+    flex-shrink: 0;
+    margin-right: 20px;
+}
+
+.percentage {
+    font-size: 24px;
+    line-height: 1;
+}
+
+.match-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.card-content {
+    flex-grow: 1;
+}
+
+.card-title {
+    font-size: 18px;
+    color: #111827;
+    margin: 0 0 8px 0;
+}
+
+.card-reasoning {
+    font-size: 14px;
+    color: #4b5563;
+    margin: 0 0 12px 0;
+}
+
+.tags .tag {
+    display: inline-block;
+    background-color: #e0e7ff;
+    color: #4338ca;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 500;
+    margin-right: 8px;
+}

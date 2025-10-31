@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-// SỬA LỖI: Thêm 'Link' vào import
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Layout from '../components/layout/Layout';
+import PathProgressTracker from '../components/PathProgressTracker'; // Import component mới
 import './LearningPathDetailPage.css';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -13,6 +13,8 @@ function LearningPathDetailPage() {
     const [path, setPath] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    const [isEnrolled, setIsEnrolled] = useState(true);
 
     useEffect(() => {
         const fetchPathDetail = async () => {
@@ -41,7 +43,6 @@ function LearningPathDetailPage() {
         fetchPathDetail();
     }, [id]);
 
-    // SỬA LỖI: Định nghĩa hàm getStatusIcon
     const getStatusIcon = (course) => {
         if (course.isLocked) return '🔒';
         if (course.status === 'completed') return '✅';
@@ -87,7 +88,7 @@ function LearningPathDetailPage() {
                         <h1 className="path-title">{path.title}</h1>
                         <p className="path-description">{path.description}</p>
                         <div className="instructor-info-header">
-                            <img src={path.instructor_avatar || '/default-avatar.png'} alt={path.instructor_name} />
+                            {/* <img src={path.instructor_avatar || '/default-avatar.png'} alt={path.instructor_name} /> */}
                             <span>Tạo bởi <strong>{path.instructor_name}</strong></span>
                         </div>
                     </div>
@@ -125,7 +126,7 @@ function LearningPathDetailPage() {
                                 );
 
                                 return (
-                                    <div key={course.id} className="timeline-item">
+                                    <div key={course.id || index} className="timeline-item">
                                         <div className="timeline-connector">
                                             <div className="timeline-dot"></div>
                                             {index < path.courses.length - 1 && <div className="timeline-line"></div>}
@@ -149,8 +150,16 @@ function LearningPathDetailPage() {
                     <div className="sidebar-card">
                         <img className="path-thumbnail" src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800" alt={path.title} />
                         <div className="sidebar-content">
-                            <button className="enroll-button">Đăng ký ngay</button>
-                            <p className="money-back-guarantee">Đảm bảo hoàn tiền trong 30 ngày</p>
+
+                            {isEnrolled ? (
+                                <PathProgressTracker pathId={id} />
+                            ) : (
+                                <>
+                                    <button className="enroll-button">Đăng ký ngay</button>
+                                    <p className="money-back-guarantee">Đảm bảo hoàn tiền trong 30 ngày</p>
+                                </>
+                            )}
+
                             <div className="path-includes">
                                 <h4>Lộ trình này bao gồm:</h4>
                                 <ul>
@@ -168,4 +177,3 @@ function LearningPathDetailPage() {
 }
 
 export default LearningPathDetailPage;
-
