@@ -12,78 +12,70 @@ router.get('/categories', async (req, res) => { /*...*/ });
 // GET /api/learning-paths/recommendations
 router.get('/recommendations', authenticateToken, async (req, res) => {
     console.log(`[${new Date().toISOString()}] --- Bắt đầu xử lý request GET /api/learning-paths/recommendations ---`);
+    let pool;
     try {
         const { id: userId } = req.user;
-        const pool = await poolPromise;
+        pool = await poolPromise; // Lấy connection pool một lần duy nhất
 
-        // 1. Lấy thông tin của người dùng hiện tại
-        const userResult = await pool.request()
-            .input('user_id', sql.Int, userId)
-            .query('SELECT skill_level, career_goal FROM dbo.Users WHERE id = @user_id');
+        // BƯỚC 1: Lấy thông tin của người dùng hiện tại một cách riêng biệt
+
+        console.log(`[${new Date().toISOString()}] Bước 1: Đang lấy thông tin user ID: ${userId}`);
+        const userRequest = pool.request().input('user_id_param', sql.Int, userId);
+        const userResult = await userRequest.query('SELECT skill_level, career_goal FROM dbo.Users WHERE id = @user_id_param OPTION (RECOMPILE)');
 
         if (userResult.recordset.length === 0) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy người dùng.' });
         }
         const currentUser = userResult.recordset[0];
+        console.log(`[${new Date().toISOString()}] ✅ Lấy thông tin user thành công. Goal: ${currentUser.career_goal}`);
 
-        // 2. Lấy tất cả các learning path mà người dùng CHƯA đăng ký
-        const candidatePathsResult = await pool.request()
-            .input('user_id', sql.Int, userId)
-            .query(`
-                SELECT lp.id, lp.title, lp.description, lp.category, lp.difficulty
-                FROM dbo.LearningPaths lp
-                WHERE lp.is_published = 1
-                  AND NOT EXISTS (
-                      SELECT 1 FROM dbo.PathEnrollments pe
-                      WHERE pe.path_id = lp.id AND pe.user_id = @user_id
-                  );
-            `);
+        // BƯỚC 2: Lấy danh sách các lộ trình ứng viên một cách riêng biệt
+        console.log(`[${new Date().toISOString()}] Bước 2: Đang lấy danh sách các lộ trình ứng viên...`);
+        const pathsRequest = pool.request().input('user_id_param', sql.Int, userId);
+        const candidatePathsResult = await pathsRequest.query(`
+            SELECT lp.id, lp.title, lp.description, lp.category, lp.difficulty
+            FROM dbo.LearningPaths lp
+            LEFT JOIN dbo.PathEnrollments pe ON lp.id = pe.path_id AND pe.user_id = @user_id_param
+            WHERE lp.is_published = 1 AND pe.id IS NULL
+            OPTION (RECOMPILE);
+        `);
         const candidatePaths = candidatePathsResult.recordset;
+        console.log(`[${new Date().toISOString()}] ✅ Tìm thấy ${candidatePaths.length} lộ trình ứng viên.`);
 
-        // 3. Tính điểm phù hợp cho từng path
+        // BƯỚC 3: Tính toán điểm (logic này không đổi và an toàn)
         const recommendations = candidatePaths.map(path => {
             let score = 0;
             let reasons = [];
-
-            // Rule 1: Dựa trên mục tiêu nghề nghiệp (career_goal) - 50 điểm
-            if (currentUser.career_goal && path.category.toLowerCase().includes(currentUser.career_goal.toLowerCase())) {
+            if (currentUser.career_goal && path.category && path.category.toLowerCase().includes(currentUser.career_goal.toLowerCase())) {
                 score += 50;
                 reasons.push(`Phù hợp với mục tiêu '${currentUser.career_goal}' của bạn`);
             }
-
-            // Rule 2: Dựa trên trình độ (skill_level) - 40 điểm
-            const difficultyMap = { 'Beginner': 1, 'Intermediate': 2, 'Advanced': 3 };
-            if (currentUser.skill_level && difficultyMap[currentUser.skill_level] === difficultyMap[path.difficulty]) {
-                score += 40;
-                reasons.push(`Có độ khó '${path.difficulty}' hợp với trình độ của bạn`);
+            if (currentUser.skill_level && path.difficulty) {
+                const difficultyMap = { 'Beginner': 1, 'Intermediate': 2, 'Advanced': 3 };
+                if (difficultyMap[currentUser.skill_level] === difficultyMap[path.difficulty]) {
+                    score += 40;
+                    reasons.push(`Có độ khó '${path.difficulty}' hợp với trình độ của bạn`);
+                }
             }
-
-            // Rule 3: Bonus điểm cho các gợi ý chung - 10 điểm
-            if (score === 0) { // Nếu không có gợi ý nào khớp, đưa ra gợi ý chung
+            if (score === 0) {
                 reasons.push('Khám phá một lĩnh vực mới');
                 score += 10;
             }
-
-            return {
-                ...path,
-                matchPercentage: Math.min(score, 100),
-                reasoning: reasons.join('. ') || 'Một gợi ý thú vị dành cho bạn.'
-            };
+            return { ...path, matchPercentage: Math.min(score, 100), reasoning: reasons.join('. ') || 'Một gợi ý thú vị dành cho bạn.' };
         });
 
-        // 4. Sắp xếp và lấy top 3 gợi ý tốt nhất
-        const topRecommendations = recommendations
-            .sort((a, b) => b.matchPercentage - a.matchPercentage)
-            .slice(0, 3);
-
+        // BƯỚC 4: Trả về kết quả
+        const topRecommendations = recommendations.sort((a, b) => b.matchPercentage - a.matchPercentage).slice(0, 3);
         console.log(`[${new Date().toISOString()}] ✅ Gợi ý thành công, trả về ${topRecommendations.length} learning paths.`);
         res.json({ success: true, data: topRecommendations });
 
     } catch (error) {
-        console.error('❌ Lỗi khi tạo gợi ý learning paths:', error.message);
+        console.error('❌ Lỗi khi tạo gợi ý learning paths:', error.message, error.stack);
         res.status(500).json({ success: false, message: 'Lỗi server khi tạo gợi ý.', error: error.message });
     }
 });
+
+
 
 router.get('/', authenticateToken, async (req, res) => {
     console.log(`[${new Date().toISOString()}] --- Bắt đầu xử lý request GET /api/learning-paths ---`);

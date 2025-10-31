@@ -2020,4 +2020,47 @@ DECLARE
     UPDATE DBO.USERS SET SKILL_LEVEL = 'Intermediate', CAREER_GOAL = 'AI/ML' WHERE ID = 6;
  
     -- student02
+    GO    
+ -- Sử dụng database của bạn
+    USE SMART_LMS;
+    GO    
+ -- Bắt đầu một transaction để đảm bảo an toàn
+    BEGIN TRANSACTION;
+ 
+    -- Cập nhật ngẫu nhiên skill_level và career_goal cho tất cả student
+    UPDATE DBO.USERS SET
+ -- Phân phối ngẫu nhiên 1 trong 3 skill levels
+    SKILL_LEVEL = CASE (
+            ABS(CHECKSUM(NEWID())) % 3
+            )
+        WHEN 0 THEN
+            'Beginner'
+        WHEN 1 THEN
+            'Intermediate'
+        ELSE
+            'Advanced'
+    END,
+ -- Phân phối ngẫu nhiên 1 trong 5 career goals
+    CAREER_GOAL = CASE (
+            ABS(CHECKSUM(NEWID())) % 5
+            )
+        WHEN 0 THEN
+            'Web Development'
+        WHEN 1 THEN
+            'Data Science'
+        WHEN 2 THEN
+            'AI/ML'
+        WHEN 3 THEN
+            'Mobile Development'
+        ELSE
+            'DevOps'
+    END WHERE ROLE = 'student'; -- Chỉ cập nhật cho các tài khoản là student
+    -- Kiểm tra lại kết quả sau khi cập nhật
+    SELECT ID, FULL_NAME, ROLE, SKILL_LEVEL, CAREER_GOAL FROM DBO.USERS WHERE ROLE = 'student';
+ 
+    -- Nếu bạn hài lòng với kết quả, hãy chạy lệnh COMMIT.
+    -- Nếu không, hãy chạy lệnh ROLLBACK để hoàn tác.
+    COMMIT;
+ 
+    -- ROLLBACK;
     GO
