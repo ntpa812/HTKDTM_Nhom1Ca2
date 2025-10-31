@@ -1,9 +1,9 @@
-// smart-lms-frontend/src/pages/LearningPathDetailPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+// SỬA LỖI: Thêm 'Link' vào import
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import Layout from '../components/layout/Layout';
-import './LearningPathDetailPage.css'; // File CSS sẽ tạo ở bước tiếp theo
+import './LearningPathDetailPage.css';
 
 const API_BASE_URL = 'http://localhost:5000/api';
 
@@ -16,11 +16,16 @@ function LearningPathDetailPage() {
 
     useEffect(() => {
         const fetchPathDetail = async () => {
-            setLoading(true);
+            const token = localStorage.getItem('token');
+            if (!token) {
+                setError("Vui lòng đăng nhập để xem chi tiết.");
+                setLoading(false);
+                return;
+            }
             try {
-                console.log(`Fetching data for id: ${id}`);
-                const response = await axios.get(`${API_BASE_URL}/learning-paths/${id}`);
-                console.log('API Response:', response.data);
+                const response = await axios.get(`${API_BASE_URL}/learning-paths/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
                 if (response.data.success) {
                     setPath(response.data.data);
                 } else {
@@ -33,10 +38,16 @@ function LearningPathDetailPage() {
                 setLoading(false);
             }
         };
-
         fetchPathDetail();
     }, [id]);
 
+    // SỬA LỖI: Định nghĩa hàm getStatusIcon
+    const getStatusIcon = (course) => {
+        if (course.isLocked) return '🔒';
+        if (course.status === 'completed') return '✅';
+        if (course.status === 'in_progress') return '⏳';
+        return '🔓';
+    };
 
     if (loading) {
         return (
@@ -62,7 +73,7 @@ function LearningPathDetailPage() {
     }
 
     if (!path) {
-        return null; // Hoặc một trang "Không tìm thấy"
+        return null;
     }
 
     return (
@@ -85,11 +96,8 @@ function LearningPathDetailPage() {
                     <div className="learning-outcomes-box">
                         <h3>Bạn sẽ học được gì?</h3>
                         <ul>
-                            {/* Dữ liệu này nên được thêm vào DB */}
                             <li>✓ Xây dựng ứng dụng web hoàn chỉnh từ đầu đến cuối.</li>
                             <li>✓ Làm chủ React cho Frontend và Node.js cho Backend.</li>
-                            <li>✓ Thiết kế và tương tác với cơ sở dữ liệu SQL.</li>
-                            <li>✓ Triển khai ứng dụng lên môi trường production.</li>
                         </ul>
                     </div>
 
@@ -97,58 +105,58 @@ function LearningPathDetailPage() {
                     <div className="course-timeline-section">
                         <h3>Lộ trình các khóa học</h3>
                         <div className="course-timeline">
-                            {path.courses.map((course, index) => (
-                                <div key={course.id} className="timeline-item">
-                                    <div className="timeline-connector">
-                                        <div className="timeline-dot"></div>
-                                        {index < path.courses.length - 1 && <div className="timeline-line"></div>}
-                                    </div>
-                                    <div className="timeline-content-card">
-                                        <p className="course-position">Phần {index + 1}</p>
+                            {path.courses.map((course, index) => {
+                                const cardClass = `timeline-content-card ${course.isLocked ? 'locked' : ''} ${course.status}`;
+
+                                const CourseCard = () => (
+                                    <div className={cardClass}>
+                                        <div className="course-header">
+                                            <p className="course-position">Phần {course.position}</p>
+                                            <span className="course-status-icon">{getStatusIcon(course)}</span>
+                                        </div>
                                         <h4 className="course-title">{course.title}</h4>
                                         <p className="course-short-desc">{course.description}</p>
+                                        {course.status === 'in_progress' && (
+                                            <div className="course-progress-bar">
+                                                <div style={{ width: `${course.progress}%` }}></div>
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
+                                );
 
-                    {/* Reviews Section */}
-                    <div className="reviews-section">
-                        <h3>Đánh giá từ học viên</h3>
-                        {path.reviews.map(review => (
-                            <div key={review.id} className="review-card">
-                                <div className="review-author">
-                                    <div className="author-avatar">{review.user.charAt(0)}</div>
-                                    <div>
-                                        <p className="author-name">{review.user}</p>
-                                        <p className="review-date">{review.date}</p>
+                                return (
+                                    <div key={course.id} className="timeline-item">
+                                        <div className="timeline-connector">
+                                            <div className="timeline-dot"></div>
+                                            {index < path.courses.length - 1 && <div className="timeline-line"></div>}
+                                        </div>
+                                        {!course.isLocked ? (
+                                            <Link to={`/courses/${course.id}`} className="timeline-card-link">
+                                                <CourseCard />
+                                            </Link>
+                                        ) : (
+                                            <CourseCard />
+                                        )}
                                     </div>
-                                </div>
-                                <div className="review-rating">{'⭐'.repeat(review.rating)}</div>
-                                <p className="review-comment">{review.comment}</p>
-                            </div>
-                        ))}
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
 
                 {/* --- Sidebar --- */}
                 <div className="sidebar-detail">
                     <div className="sidebar-card">
-                        {/* Mock Image */}
                         <img className="path-thumbnail" src="https://images.unsplash.com/photo-1501504905252-473c47e087f8?w=800" alt={path.title} />
                         <div className="sidebar-content">
                             <button className="enroll-button">Đăng ký ngay</button>
                             <p className="money-back-guarantee">Đảm bảo hoàn tiền trong 30 ngày</p>
-
                             <div className="path-includes">
                                 <h4>Lộ trình này bao gồm:</h4>
                                 <ul>
                                     <li><strong>{path.estimated_hours}</strong> giờ học</li>
                                     <li><strong>{path.courses.length}</strong> khóa học chi tiết</li>
                                     <li>Truy cập trọn đời</li>
-                                    <li>Bài tập và dự án thực tế</li>
-                                    <li>Chứng chỉ hoàn thành</li>
                                 </ul>
                             </div>
                         </div>
@@ -160,3 +168,4 @@ function LearningPathDetailPage() {
 }
 
 export default LearningPathDetailPage;
+

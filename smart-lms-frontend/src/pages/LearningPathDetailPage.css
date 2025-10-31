@@ -219,3 +219,50 @@
 .review-rating {
     margin-bottom: 8px;
 }
+
+/* Thêm vào cuối file LearningPathDetailPage.css */
+
+.timeline-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    width: 100%;
+}
+
+.timeline-content-card.locked {
+    background-color: #f8fafc;
+    opacity: 0.7;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+.timeline-content-card.locked:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.course-status-icon {
+    font-size: 20px;
+}
+
+.course-progress-bar {
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    margin-top: 12px;
+    overflow: hidden;
+}
+
+.course-progress-bar div {
+    height: 100%;
+    background: #4ade80;
+    /* Màu xanh lá cho tiến độ */
+    transition: width 0.3s ease;
+}
