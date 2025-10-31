@@ -115,4 +115,69 @@ router.get('/', async (req, res) => {
 
 console.log('✅ Tất cả routes cho Learning Paths đã được tải.');
 
+// Thêm vào cuối file smart-lms-backend/src/routes/learningPaths.js
+
+// GET /api/learning-paths/:slug - Lấy chi tiết một learning path
+router.get('/:slug', async (req, res) => {
+    try {
+        const { slug } = req.params;
+        const pool = await poolPromise;
+        const request = pool.request();
+        request.input('slug', sql.NVarChar, slug);
+
+        // 1. Lấy thông tin chính của Learning Path và instructor
+        const pathQuery = `
+            SELECT 
+                lp.id, lp.title, lp.slug, lp.description, lp.category, lp.difficulty,
+                lp.estimated_hours, lp.created_at,
+                u.full_name as instructor_name,
+                u.username as instructor_username,
+                u.avatar_url as instructor_avatar,
+                u.bio as instructor_bio
+            FROM LearningPaths lp
+            JOIN Users u ON lp.owner_id = u.id
+            WHERE lp.slug = @slug AND lp.is_published = 1;
+        `;
+        const pathResult = await request.query(pathQuery);
+
+        if (pathResult.recordset.length === 0) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy Learning Path hoặc chưa được publish.' });
+        }
+        const learningPath = pathResult.recordset[0];
+
+        // 2. Lấy danh sách khóa học trong path, sắp xếp theo thứ tự
+        const coursesQuery = `
+            SELECT c.id, c.title, c.description, c.duration_hours, pc.position
+            FROM PathCourses pc
+            JOIN Courses c ON pc.course_id = c.id
+            WHERE pc.path_id = @path_id
+            ORDER BY pc.position ASC;
+        `;
+        const coursesResult = await pool.request()
+            .input('path_id', sql.Int, learningPath.id)
+            .query(coursesQuery);
+        learningPath.courses = coursesResult.recordset;
+
+        // 3. Mock data cho reviews và related paths (sẽ được thay thế bằng dữ liệu thật sau)
+        learningPath.reviews = [
+            { id: 1, user: 'Nguyễn Văn An', rating: 5, comment: 'Lộ trình tuyệt vời, rất chi tiết và dễ hiểu! Giảng viên nhiệt tình.', date: '2025-10-20' },
+            { id: 2, user: 'Trần Thị Bích', rating: 4, comment: 'Nội dung hay, nhưng một vài video ở khóa React bị lỗi âm thanh.', date: '2025-10-18' },
+            { id: 3, user: 'Lê Hoàng Cường', rating: 5, comment: 'Rất đáng tiền, tôi đã học được rất nhiều và áp dụng được ngay vào dự án cá nhân.', date: '2025-10-15' }
+        ];
+        // Thêm logic để lấy các learning path liên quan (ví dụ: cùng category)
+        learningPath.related_paths = [];
+
+        // 4. (Tùy chọn) Kiểm tra trạng thái đăng ký của user hiện tại
+        // Code này cần authenticateToken middleware cho route này nếu muốn hoạt động
+        // learningPath.enrollment = null; // Mặc định
+
+        res.json({ success: true, data: learningPath });
+
+    } catch (error) {
+        console.error('❌ Lỗi khi lấy chi tiết learning path:', error);
+        res.status(500).json({ success: false, message: 'Lỗi server khi lấy dữ liệu.', error: error.message });
+    }
+});
+
+
 module.exports = router;

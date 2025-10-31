@@ -1,50 +1,30 @@
+// smart-lms-frontend/src/App.js
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// Import các pages của bạn
 import Login from './pages/Login';
-import DashboardRouter from './pages/DashboardRouter';  // Thêm import
-import Courses from './pages/Courses';
-import Analytics from './pages/Analytics';
+import DashboardRouter from './pages/DashboardRouter'; // Component điều hướng dashboard
 import LearningPath from './pages/LearningPath';
+import LearningPathDetailPage from './pages/LearningPathDetailPage';
 import InstructorLearningPaths from './pages/InstructorLearningPaths';
+import PrivateRoute from './components/PrivateRoute'; // Component bảo vệ route
 
 function App() {
-  const isAuthenticated = () => {
-    return localStorage.getItem('token') !== null;
-  };
-
-  const PrivateRoute = ({ children }) => {
-    return isAuthenticated() ? children : <Navigate to="/login" />;
-  };
-
   return (
     <Router>
+      {/* Tất cả các component sử dụng hooks của router phải nằm trong này */}
       <Routes>
+        {/* Các route công khai */}
         <Route path="/login" element={<Login />} />
 
-        {/* Thay thế 3 route dashboard bằng 1 route sử dụng DashboardRouter */}
+        {/* Các route được bảo vệ */}
         <Route
           path="/dashboard"
           element={
             <PrivateRoute>
               <DashboardRouter />
-            </PrivateRoute>
-          }
-        />
-
-        {/* Giữ nguyên các route khác */}
-        <Route
-          path="/courses"
-          element={
-            <PrivateRoute>
-              <Courses />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/analytics"
-          element={
-            <PrivateRoute>
-              <Analytics />
             </PrivateRoute>
           }
         />
@@ -57,6 +37,14 @@ function App() {
           }
         />
         <Route
+          path="/learning-paths/:slug"
+          element={
+            <PrivateRoute>
+              <LearningPathDetailPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/instructor/learning-paths"
           element={
             <PrivateRoute>
@@ -65,7 +53,11 @@ function App() {
           }
         />
 
+        {/* Route mặc định, chuyển hướng về dashboard */}
         <Route path="/" element={<Navigate to="/dashboard" />} />
+
+        {/* Thêm các route khác của bạn ở đây */}
+
       </Routes>
     </Router>
   );
