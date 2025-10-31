@@ -8,6 +8,10 @@ import LearningPath from './pages/LearningPath';
 import LearningPathDetailPage from './pages/LearningPathDetailPage';
 import InstructorLearningPaths from './pages/InstructorLearningPaths';
 import PrivateRoute from './components/PrivateRoute';
+import CourseDetail from './components/CourseDetail/index.jsx';
+import CourseSearchFilter from './components/CourseSearchFilter/index.jsx';
+import CourseCategories from './components/CourseCategories/index.jsx';
+
 
 // SỬA LỖI: Thêm import cho trang Courses
 import Courses from './pages/Courses'; // Giả sử component của bạn tên là Courses và nằm ở đây
@@ -31,6 +35,16 @@ function App() {
         />
 
         {/* SỬA LỖI: Thêm lại route cho trang Khóa học */}
+        <Route
+          path="/courses/search"
+          element={
+            <PrivateRoute>
+              <CourseSearchFilter />
+            </PrivateRoute>
+          }
+        />
+
+
         <Route
           path="/courses"
           element={
