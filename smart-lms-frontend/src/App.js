@@ -1,28 +1,29 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+
+// Import các pages của bạn
 import Login from './pages/Login';
-import DashboardRouter from './pages/DashboardRouter';  // Thêm import
-import Courses from './pages/Courses';
-import Analytics from './pages/Analytics';
+import DashboardRouter from './pages/DashboardRouter';
 import LearningPath from './pages/LearningPath';
+import LearningPathDetailPage from './pages/LearningPathDetailPage';
+import InstructorLearningPaths from './pages/InstructorLearningPaths';
+import PrivateRoute from './components/PrivateRoute';
 import CourseDetail from './components/CourseDetail/index.jsx';
 import CourseSearchFilter from './components/CourseSearchFilter/index.jsx';
 import CourseCategories from './components/CourseCategories/index.jsx';
 
 
+// SỬA LỖI: Thêm import cho trang Courses
+import Courses from './pages/Courses'; // Giả sử component của bạn tên là Courses và nằm ở đây
+
 function App() {
-  const isAuthenticated = () => {
-    return localStorage.getItem('token') !== null;
-  };
-
-  const PrivateRoute = ({ children }) => {
-    return isAuthenticated() ? children : <Navigate to="/login" />;
-  };
-
   return (
     <Router>
       <Routes>
+        {/* === ROUTE CÔNG KHAI === */}
         <Route path="/login" element={<Login />} />
+
+        {/* === CÁC ROUTE ĐƯỢC BẢO VỆ === */}
 
         <Route
           path="/dashboard"
@@ -33,7 +34,7 @@ function App() {
           }
         />
 
-        {/* Giữ nguyên các route khác */}
+        {/* SỬA LỖI: Thêm lại route cho trang Khóa học */}
         <Route
           path="/courses/search"
           element={
@@ -53,25 +54,6 @@ function App() {
           }
         />
 
-        {/* ✅ Thêm route Course Detail */}
-        <Route
-          path="/courses/:id"
-          element={
-            <PrivateRoute>
-              <CourseDetail />
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/analytics"
-          element={
-            <PrivateRoute>
-              <Analytics />
-            </PrivateRoute>
-          }
-        />
-
         <Route
           path="/learning"
           element={
@@ -80,24 +62,28 @@ function App() {
             </PrivateRoute>
           }
         />
+
         <Route
-          path="/categories/:category"
+          path="/learning-paths/:id" // Đảm bảo dùng :id như đã thống nhất
           element={
             <PrivateRoute>
-              <CourseCategories />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/categories"
-          element={
-            <PrivateRoute>
-              <CourseCategories />
+              <LearningPathDetailPage />
             </PrivateRoute>
           }
         />
 
-        <Route path="/" element={<Navigate to="/dashboard" />} />
+        <Route
+          path="/instructor/learning-paths"
+          element={
+            <PrivateRoute>
+              <InstructorLearningPaths />
+            </PrivateRoute>
+          }
+        />
+
+        {/* === ROUTE MẶC ĐỊNH === */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
       </Routes>
     </Router>
   );

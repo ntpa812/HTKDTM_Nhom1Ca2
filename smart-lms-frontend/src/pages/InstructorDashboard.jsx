@@ -76,6 +76,13 @@ function InstructorDashboard() {
                         </span>
                     </div>
                 </header>
+                {/* 
+                <button
+                    onClick={() => navigate('/instructor/learning-paths')}
+                    className="nav-item"
+                >
+                    📚 Manage Learning Paths
+                </button> */}
 
                 <div className="dashboard-content">
                     {/* Stats Cards */}
