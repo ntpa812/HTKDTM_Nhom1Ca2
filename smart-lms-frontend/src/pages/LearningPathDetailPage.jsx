@@ -8,7 +8,7 @@ import './LearningPathDetailPage.css'; // File CSS sẽ tạo ở bước tiếp
 const API_BASE_URL = 'http://localhost:5000/api';
 
 function LearningPathDetailPage() {
-    const { slug } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
     const [path, setPath] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -18,8 +18,8 @@ function LearningPathDetailPage() {
         const fetchPathDetail = async () => {
             setLoading(true);
             try {
-                console.log(`Fetching data for slug: ${slug}`);
-                const response = await axios.get(`${API_BASE_URL}/learning-paths/${slug}`);
+                console.log(`Fetching data for id: ${id}`);
+                const response = await axios.get(`${API_BASE_URL}/learning-paths/${id}`);
                 console.log('API Response:', response.data);
                 if (response.data.success) {
                     setPath(response.data.data);
@@ -35,7 +35,7 @@ function LearningPathDetailPage() {
         };
 
         fetchPathDetail();
-    }, [slug]);
+    }, [id]);
 
 
     if (loading) {

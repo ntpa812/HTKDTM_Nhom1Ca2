@@ -36,14 +36,8 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/learning-paths/:slug"
-          element={
-            <PrivateRoute>
-              <LearningPathDetailPage />
-            </PrivateRoute>
-          }
-        />
+        <Route path="/learning-paths/:id" element={<LearningPathDetailPage />} />
+
         <Route
           path="/instructor/learning-paths"
           element={
