@@ -8,9 +8,8 @@ import LearningPath from './pages/LearningPath';
 import LearningPathDetailPage from './pages/LearningPathDetailPage';
 import InstructorLearningPaths from './pages/InstructorLearningPaths';
 import PrivateRoute from './components/PrivateRoute';
-
-// SỬA LỖI: Thêm import cho trang Courses
-import Courses from './pages/Courses'; // Giả sử component của bạn tên là Courses và nằm ở đây
+import Analytics from './pages/Analytics';
+import Courses from './pages/Courses';
 
 function App() {
   return (
@@ -66,6 +65,8 @@ function App() {
             </PrivateRoute>
           }
         />
+
+        <Route path="/analytics" element={<Analytics />} />
 
         {/* === ROUTE MẶC ĐỊNH === */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />

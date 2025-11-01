@@ -1,0 +1,309 @@
+.analytics-container {
+    padding: 20px;
+    background-color: #f9fafb;
+}
+
+.table-wrapper {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    /* Giúp bo góc cho table */
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.analytics-table th,
+.analytics-table td {
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.analytics-table thead {
+    background-color: #f3f4f6;
+}
+
+.analytics-table th {
+    font-weight: 600;
+    color: #374151;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.analytics-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.path-title {
+    font-weight: 600;
+    color: #111827;
+}
+
+.path-difficulty {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 4px;
+}
+
+.rate-badge {
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.rate-high {
+    background-color: #10b981;
+    /* Green */
+}
+
+.rate-medium {
+    background-color: #f59e0b;
+    /* Amber */
+}
+
+.rate-low {
+    background-color: #ef4444;
+    /* Red */
+}
+
+.error-container {
+    padding: 40px;
+    text-align: center;
+    background-color: #fffbeb;
+    color: #b45309;
+    border-radius: 8px;
+}
+
+/* Thêm vào cuối file Analytics.css */
+
+.time-period-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.time-period-selector h3 {
+    margin: 0;
+    font-size: 18px;
+    color: #374151;
+}
+
+.time-btn {
+    background-color: transparent;
+    border: 1px solid #d1d5db;
+    color: #4b5563;
+    padding: 8px 16px;
+    margin-left: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.time-btn:hover {
+    background-color: #f3f4f6;
+}
+
+.time-btn.active {
+    background-color: #4f46e5;
+    color: #ffffff;
+    border-color: #4f46e5;
+}
+
+.chart-wrapper {
+    background-color: #ffffff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.custom-tooltip {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.custom-tooltip .label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Thêm hoặc thay thế các class này trong file Analytics.css */
+
+.path-title {
+    font-weight: 600;
+    font-size: 15px;
+    /* Chữ to và rõ hơn */
+    color: #1f2937;
+    margin-bottom: 6px;
+    /* Tạo khoảng cách với thẻ difficulty */
+}
+
+.path-difficulty {
+    display: inline-block;
+    /* Biến thành dạng thẻ (badge) */
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 12px;
+    line-height: 1.5;
+}
+
+/* Thêm màu sắc riêng cho từng loại độ khó */
+.path-difficulty.Beginner {
+    background-color: #dcfce7;
+    /* Nền xanh lá nhạt */
+    color: #166534;
+    /* Chữ xanh lá đậm */
+}
+
+.path-difficulty.Intermediate {
+    background-color: #fef3c7;
+    /* Nền vàng nhạt */
+    color: #92400e;
+    /* Chữ vàng đậm */
+}
+
+.path-difficulty.Advanced {
+    background-color: #fee2e2;
+    /* Nền đỏ nhạt */
+    color: #991b1b;
+    /* Chữ đỏ đậm */
+}
+
+/* ================================================= */
+/* === CSS HOÀN CHỈNH CHO BẢNG PHÂN TÍCH (TABLE) === */
+/* ================================================= */
+
+.table-wrapper {
+    background-color: #ffffff;
+    border-radius: 12px;
+    /* Bo góc mềm mại hơn */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    /* Đổ bóng nhẹ nhàng */
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    /* Thêm đường viền mỏng */
+}
+
+.analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+/* --- Tùy chỉnh Header của bảng (th) --- */
+.analytics-table th {
+    padding: 12px 24px;
+    background-color: #f9fafb;
+    /* Màu nền header sáng hơn */
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    font-size: 11px;
+    /* Chữ nhỏ và chuyên nghiệp */
+    letter-spacing: 0.05em;
+    /* Tăng khoảng cách giữa các chữ */
+    text-align: left;
+    border-bottom: 2px solid #e5e7eb;
+    /* Đường kẻ chân header dày hơn */
+}
+
+/* --- Tùy chỉnh Nội dung của bảng (td) --- */
+.analytics-table td {
+    padding: 16px 24px;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+    /* Đường kẻ mỗi dòng siêu mỏng */
+    vertical-align: middle;
+    /* Căn giữa các nội dung trong ô */
+}
+
+/* Bỏ đường kẻ cho dòng cuối cùng */
+.analytics-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Hiệu ứng hover cho mỗi dòng */
+.analytics-table tbody tr:hover {
+    background-color: #fafafa;
+}
+
+/* --- Các class tùy chỉnh bên trong ô --- */
+
+/* Tiện ích căn phải cho các số liệu */
+.text-right {
+    text-align: right;
+    font-family: 'ui-monospace', 'Menlo', 'Monaco', 'Consolas', monospace;
+    /* Font chữ cho số liệu */
+    font-weight: 500;
+}
+
+.path-title {
+    font-weight: 600;
+    font-size: 15px;
+    color: #1f2937;
+    margin-bottom: 6px;
+}
+
+.path-difficulty {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 12px;
+    line-height: 1.5;
+}
+
+.path-difficulty.Beginner {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.path-difficulty.Intermediate {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.path-difficulty.Advanced {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+/* Huy hiệu Tỷ lệ hoàn thành */
+.rate-badge {
+    display: inline-block;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #ffffff;
+}
+
+.rate-high {
+    background-color: #10b981;
+}
+
+.rate-medium {
+    background-color: #f59e0b;
+}
+
+.rate-low {
+    background-color: #ef4444;
+}

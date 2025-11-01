@@ -5,11 +5,13 @@ const router = express.Router();
 const authRoutes = require('./auth');
 const coursesRoutes = require('./courses');
 const learningPathsRoutes = require('./learningPaths');
+const analyticsRoutes = require('./analytics');
 
 // --- SỬ DỤNG CÁC ROUTE ---
 router.use('/auth', authRoutes);
 router.use('/courses', coursesRoutes);
 router.use('/learning-paths', learningPathsRoutes);
+router.use('/analytics', analyticsRoutes);
 
 // Health check (cập nhật để hiển thị route mới)
 router.get('/health', (req, res) => {
