@@ -2082,3 +2082,14 @@ DECLARE
     -- Seed bài học cho Course ID = 2 (Python for Beginners)
     INSERT INTO DBO.LESSONS ( COURSE_ID, TITLE, DURATION_MINUTES, POSITION, IS_PREVIEW_ALLOWED ) VALUES ( 2, N'Bài 1: Cài đặt Python và môi trường phát triển', 20, 1, 1 ), ( 2, N'Bài 2: Cú pháp cơ bản và chương trình đầu tiên', 15, 2, 0 ), ( 2, N'Bài 3: Các kiểu dữ liệu cơ bản', 25, 3, 0 ), ( 2, N'Bài 4: Cấu trúc dữ liệu List, Tuple, Dictionary', 40, 4, 0 );
     PRINT  'Đã seed dữ liệu mẫu cho bảng Lessons!';
+ 
+    -- Bảng lưu trữ dữ liệu hành vi và hiệu suất học tập của sinh viên
+    CREATE TABLE STUDENTBEHAVIORS ( BEHAVIORID INT PRIMARY KEY IDENTITY(1, 1), USERID INT FOREIGN KEY REFERENCES USERS(ID), -- Liên kết với bảng Users hiện có
+    STUDYHOURS FLOAT, ASSIGNMENTCOMPLETIONRATE FLOAT, QUIZSCORE_AVG FLOAT, PLATFORMENGAGEMENT_MINUTES INT, -- Tổng thời gian tương tác trên nền tảng
+    LEARNINGSTYLE NVARCHAR(50), -- Ví dụ: 'Visual', 'Auditory', 'Kinesthetic'
+    DEVICETYPE NVARCHAR(50), -- Ví dụ: 'Desktop', 'Mobile'
+    SATISFACTIONLEVEL INT CHECK (SATISFACTIONLEVEL BETWEEN 1
+    AND 5), -- Mức độ hài lòng
+    -- Thêm các cột khác từ dataset của bạn nếu cần
+    RECORDEDDATE DATETIME DEFAULT GETDATE() -- Thời điểm ghi lại dữ liệu
+    );
