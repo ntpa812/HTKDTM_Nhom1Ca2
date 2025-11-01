@@ -527,3 +527,408 @@
     color: #3730a3;
     /* Chữ tím đậm */
 }
+
+/* ========================================= */
+/* === LAYOUT CHÍNH CỦA TRANG HỌC TẬP === */
+/* ========================================= */
+
+.learning-page-grid {
+    display: grid;
+    /* Cấu trúc 2 cột: Cột lọc bên trái (cố định), cột nội dung bên phải (linh hoạt) */
+    grid-template-columns: 280px 1fr;
+    gap: 32px;
+    /* Khoảng cách giữa 2 cột */
+    align-items: start;
+    /* Căn các cột theo chiều dọc từ trên xuống */
+}
+
+/* Cột bên trái cho bộ lọc */
+.filters-column {
+    position: sticky;
+    /* Giúp bộ lọc đi theo màn hình khi cuộn */
+    top: 20px;
+}
+
+/* Cột bên phải chứa nội dung chính */
+.main-column {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    /* Khoảng cách giữa khu vực Gợi ý và Danh sách chính */
+}
+
+/* ========================================= */
+/* === CÁC THÀNH PHẦN KHÁC (giữ nguyên và tối ưu) === */
+/* ========================================= */
+
+.header {
+    margin-bottom: 32px;
+}
+
+.pageTitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+}
+
+.pageSubtitle {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* --- Khu vực bộ lọc --- */
+.filters-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.searchInput {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+}
+
+.filterControls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filterLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+}
+
+.filterSelect {
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    background: white;
+}
+
+.resetBtn {
+    margin-top: 10px;
+    background: #f1f5f9;
+    border: none;
+    color: #475569;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* --- Khu vực Gợi ý --- */
+.recommendations-section {
+    padding: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recommendations-section .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+/* (Các style khác cho card gợi ý giữ nguyên) */
+
+/* --- Khu vực Danh sách Lộ trình --- */
+.paths-list-section .results-info {
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.paths-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* (Các style khác cho path-card giữ nguyên) */
+
+.pathCard {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.pathCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ... Các style chi tiết bên trong card ... */
+
+/* ========================================= */
+/* === LAYOUT MỘT CỘT, TỪ TRÊN XUỐNG DƯỚI === */
+/* ========================================= */
+
+.learning-page-container {
+    display: flex;
+    flex-direction: column;
+    /* Quan trọng: Xếp các section theo chiều dọc */
+    gap: 32px;
+    /* Khoảng cách giữa các khu vực (filter, recommend, list) */
+}
+
+/* Các khu vực chính */
+.filters-section,
+.recommendations-section,
+.paths-list-section {
+    width: 100%;
+    /* Đảm bảo mỗi khu vực chiếm toàn bộ chiều rộng */
+}
+
+/* ========================================= */
+/* === CÁC THÀNH PHẦN KHÁC (giữ nguyên và tối ưu) === */
+/* ========================================= */
+
+.header {
+    margin-bottom: 32px;
+}
+
+.pageTitle {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 8px 0;
+}
+
+.pageSubtitle {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+}
+
+/* --- Khu vực bộ lọc --- */
+.filters-section {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.filterControls {
+    display: grid;
+    /* Hiển thị các bộ lọc trên một lưới cho đẹp hơn */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    align-items: end;
+}
+
+/* --- Khu vực Gợi ý --- */
+.recommendations-section {
+    padding: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recommendations-section .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* (Các style khác cho card gợi ý giữ nguyên) */
+
+
+/* --- Khu vực Danh sách Lộ trình --- */
+.paths-list-section .results-info {
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.paths-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 24px;
+}
+
+.pathCard {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* (Các style chi tiết bên trong card giữ nguyên) */
+
+
+.recommendations-grid {
+    display: grid;
+    /* THAY ĐỔI Ở ĐÂY: Chiều rộng tối thiểu của mỗi card giờ là 250px */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    /* Giảm khoảng cách một chút cho gọn hơn */
+}
+
+/* ========================================= */
+/* === CSS CHO RECOMMENDATION CARD (HOÀN CHỈNH) === */
+/* ========================================= */
+
+/* Container chính của khu vực gợi ý (giữ nguyên) */
+.recommendations-section {
+    padding: 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.recommendations-section .section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding-bottom: 10px;
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    /* Điều chỉnh chiều rộng card ở đây */
+    gap: 20px;
+}
+
+/* --- PHẦN CẬP NHẬT CHÍNH --- */
+
+/* 1. Thẻ Link bao bọc, sử dụng Flexbox để căn chỉnh */
+.recommendation-card {
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    /* Căn huy hiệu và nội dung theo chiều dọc */
+    gap: 20px;
+    /* Khoảng cách giữa huy hiệu và nội dung */
+    border-radius: 12px;
+    padding: 16px;
+    text-decoration: none;
+    /* Bỏ gạch chân của Link */
+    transition: all 0.2s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    border-color: #a78bfa;
+}
+
+/* 2. Huy hiệu % phù hợp (bên trái) */
+.match-badge {
+    flex-shrink: 0;
+    /* Ngăn huy hiệu bị co lại */
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #818cf8, #a78bfa);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.match-percentage {
+    font-size: 24px;
+}
+
+.match-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+}
+
+/* 3. Nội dung text (bên phải) */
+.recommendation-content {
+    flex-grow: 1;
+    /* Chiếm hết không gian còn lại */
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Khoảng cách giữa tiêu đề, lý do, và tags */
+}
+
+.recommendation-content .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #3730a3;
+    /* Màu tím đậm */
+    margin: 0;
+}
+
+.recommendation-content .card-reasoning {
+    font-size: 14px;
+    color: #4b5563;
+    /* Màu xám đậm cho dễ đọc */
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* 4. Khu vực chứa các tag */
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    /* Cho phép các tag xuống dòng nếu không đủ chỗ */
+    gap: 8px;
+    margin-top: 4px;
+    /* Tạo khoảng trống phía trên các tag */
+}
+
+.tag {
+    background-color: #e0e7ff;
+    /* Nền tím nhạt */
+    color: #3730a3;
+    /* Chữ tím đậm */
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 12px;
+}
