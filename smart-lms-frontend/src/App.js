@@ -31,6 +31,16 @@ function App() {
 
         {/* SỬA LỖI: Thêm lại route cho trang Khóa học */}
         <Route
+          path="/courses/search"
+          element={
+            <PrivateRoute>
+              <CourseSearchFilter />
+            </PrivateRoute>
+          }
+        />
+
+
+        <Route
           path="/courses"
           element={
             <PrivateRoute>
