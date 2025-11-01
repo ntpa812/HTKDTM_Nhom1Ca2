@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './RecommendationCard.css';
+import { Link } from 'react-router-dom';
 
 function RecommendationCard({ path }) {
     const navigate = useNavigate();
@@ -24,5 +25,4 @@ function RecommendationCard({ path }) {
         </div>
     );
 }
-
 export default RecommendationCard;

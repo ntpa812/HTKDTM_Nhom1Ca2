@@ -6,7 +6,7 @@ const authRoutes = require('./auth');
 const coursesRoutes = require('./courses');
 const learningPathsRoutes = require('./learningPaths');
 const analyticsRoutes = require('./analytics');
-// Bạn có thể import thêm các route khác như progress, users, ai ở đây khi cần
+
 
 // --- SỬ DỤNG CÁC ROUTE ---
 router.use('/auth', authRoutes);

@@ -254,7 +254,7 @@ function LearningPath() {
 
     if (loading) {
         return (
-            <Layout title="Learning Paths" subtitle="Đang tải dữ liệu...">
+            <Layout title="Lộ trình học tập" subtitle="Đang tải dữ liệu...">
                 <div className="loadingContainer">
                     <div className="loadingSpinner">🔄</div>
                     <p>Đang tải Learning Paths từ database...</p>
@@ -264,201 +264,197 @@ function LearningPath() {
     }
 
     return (
-        <Layout title="Learning Paths">
-            <div className="container">
-                {/* <div className="header">
-                    <div>
-                        <h2 className="pageTitle">📚 Learning Paths</h2>
-                        <p className="pageSubtitle">
-                            Khám phá {allPaths.length} lộ trình học tập có cấu trúc
-                        </p>
-                    </div>
-                </div> */}
-
-                <div className="filtersSection">
-                    <div className="searchContainer">
-                        <input
-                            type="text"
-                            placeholder="🔍 Tìm kiếm learning path..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="searchInput"
-                        />
-                    </div>
-
-                    <div className="filterControls">
-                        <div className="filterGroup">
-                            <label className="filterLabel">Trạng thái:</label>
-                            <select
-                                value={filters.status}
-                                onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-                                className="filterSelect"
-                            >
-                                <option value="all">Tất cả</option>
-                                <option value="enrolled">Đã đăng ký</option>
-                                <option value="available">Có thể đăng ký</option>
-                            </select>
+        <Layout title="Lộ trình học tập" subtitle="Khám phá các lộ trình học tập có cấu trúc">
+            <div className="learning-page-grid">
+                <aside className="filters-column">
+                    <div className="filtersSection">
+                        <div className="searchContainer">
+                            <input
+                                type="text"
+                                placeholder="🔍 Tìm kiếm learning path..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="searchInput"
+                            />
                         </div>
 
-                        <div className="filterGroup">
-                            <label className="filterLabel">Category:</label>
-                            <select
-                                value={filters.category}
-                                onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-                                className="filterSelect"
-                            >
-                                <option value="all">Tất cả</option>
-                                {categories.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="filterGroup">
-                            <label className="filterLabel">Difficulty:</label>
-                            <select
-                                value={filters.difficulty}
-                                onChange={(e) => setFilters({ ...filters, difficulty: e.target.value })}
-                                className="filterSelect"
-                            >
-                                <option value="all">Tất cả</option>
-                                <option value="Beginner">Beginner</option>
-                                <option value="Intermediate">Intermediate</option>
-                                <option value="Advanced">Advanced</option>
-                            </select>
-                        </div>
-
-                        <div className="filterGroup">
-                            <label className="filterLabel">Sắp xếp:</label>
-                            <select
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                                className="filterSelect"
-                            >
-                                <option value="newest">Mới nhất</option>
-                                <option value="popular">Phổ biến nhất</option>
-                                <option value="shortest">Thời gian ngắn nhất</option>
-                                <option value="rating">Đánh giá cao nhất</option>
-                            </select>
-                        </div>
-
-                        <button className="resetBtn" onClick={resetFilters}>
-                            🔄 Reset
-                        </button>
-                    </div>
-                </div>
-
-                {recommendations.length > 0 && (
-                    <div className="recommendations-section">
-                        <h3 className="section-title">✨ Gợi ý dành riêng cho bạn</h3>
-                        <div className="recommendations-grid">
-                            {recommendations.map(path => (
-                                <RecommendationCard key={`rec-${path.id}`} path={path} />
-                            ))}
-                        </div>
-                    </div>
-                )}
-
-                <div className="resultsInfo">
-                    <span>
-                        Hiển thị {filteredPaths.length} trong số {allPaths.length} learning paths
-                    </span>
-                </div>
-
-                {filteredPaths.length > 0 ? (
-                    <div className="pathsGrid">
-                        {filteredPaths.map(path => (
-                            <div key={path.id} className="pathCard">
-                                <div className="cardHeader">
-                                    <div className="cardTitle">{path.title}</div>
-                                    <div
-                                        className="difficultyBadge"
-                                        style={{ backgroundColor: getDifficultyColor(path.difficulty) }}
-                                    >
-                                        {path.difficulty}
-                                    </div>
-                                </div>
-
-                                <div className="cardContent">
-                                    <p className="cardDescription">{path.description}</p>
-
-                                    <div className="instructorRow">
-                                        <div className="instructorInfo">
-                                            👨‍🏫 {path.instructor}
-                                        </div>
-                                        <div className="ratingInfo">
-                                            <span className="stars">
-                                                {renderStars(path.rating)}
-                                            </span>
-                                            <span className="ratingText">
-                                                {path.rating} ({path.totalRatings})
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <div className="cardMeta">
-                                        <div className="metaItem">📚 {path.coursesCount} courses</div>
-                                        <div className="metaItem">👥 {path.enrolledCount} enrolled</div>
-                                        <div className="metaItem">⏱️ {path.estimatedHours}h</div>
-                                        <div className="metaItem">🏷️ {path.category}</div>
-                                    </div>
-
-                                    {path.isEnrolled && path.progress > 0 && (
-                                        <div className="progressSection">
-                                            <div className="progressLabel">
-                                                Tiến độ: {path.progress}%
-                                            </div>
-                                            <div className="progressBar">
-                                                <div
-                                                    className="progressFill"
-                                                    style={{ width: `${path.progress}%` }}
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="cardActions">
-                                    <button
-                                        className="detailButton"
-                                        onClick={() => navigate(`/learning-paths/${path.id}`)}
-                                    >
-                                        Xem chi tiết
-                                    </button>
-
-                                    {!path.isEnrolled ? (
-                                        <button
-                                            className="enrollButton"
-                                            onClick={() => handleEnroll(path.id)}
-                                        >
-                                            Đăng ký học
-                                        </button>
-                                    ) : (
-                                        <button
-                                            className="continueButton"
-                                            onClick={() => navigate(`/learning-paths/${path.id}/continue`)}
-                                        >
-                                            Tiếp tục học
-                                        </button>
-                                    )}
-                                </div>
+                        <div className="filterControls">
+                            <div className="filterGroup">
+                                <label className="filterLabel">Trạng thái:</label>
+                                <select
+                                    value={filters.status}
+                                    onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+                                    className="filterSelect"
+                                >
+                                    <option value="all">Tất cả</option>
+                                    <option value="enrolled">Đã đăng ký</option>
+                                    <option value="available">Có thể đăng ký</option>
+                                </select>
                             </div>
-                        ))}
+
+                            <div className="filterGroup">
+                                <label className="filterLabel">Category:</label>
+                                <select
+                                    value={filters.category}
+                                    onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                                    className="filterSelect"
+                                >
+                                    <option value="all">Tất cả</option>
+                                    {categories.map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="filterGroup">
+                                <label className="filterLabel">Difficulty:</label>
+                                <select
+                                    value={filters.difficulty}
+                                    onChange={(e) => setFilters({ ...filters, difficulty: e.target.value })}
+                                    className="filterSelect"
+                                >
+                                    <option value="all">Tất cả</option>
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                            </div>
+
+                            <div className="filterGroup">
+                                <label className="filterLabel">Sắp xếp:</label>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="filterSelect"
+                                >
+                                    <option value="newest">Mới nhất</option>
+                                    <option value="popular">Phổ biến nhất</option>
+                                    <option value="shortest">Thời gian ngắn nhất</option>
+                                    <option value="rating">Đánh giá cao nhất</option>
+                                </select>
+                            </div>
+
+                            <button className="resetBtn" onClick={resetFilters}>
+                                🔄 Reset
+                            </button>
+                        </div>
                     </div>
-                ) : (
-                    <div className="emptyState">
-                        <div className="emptyIcon">🔍</div>
-                        <h3 className="emptyTitle">Không tìm thấy learning path nào</h3>
-                        <p className="emptyText">
-                            Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
-                        </p>
-                        <button className="resetBtn" onClick={resetFilters}>
-                            🔄 Reset bộ lọc
-                        </button>
-                    </div>
-                )}
+                </aside>
+
+                <main className="main-column">
+                    {recommendations.length > 0 && (
+                        <div className="recommendations-section">
+                            <h3 className="section-title">✨ Gợi ý dành riêng cho bạn</h3>
+                            <div className="recommendations-grid">
+                                {recommendations.map(path => (
+                                    <RecommendationCard key={`rec-${path.id}`} path={path} />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <section className="paths-list-section">
+                        <div className="resultsInfo">
+                            <span>
+                                Hiển thị {filteredPaths.length} trong số {allPaths.length} learning paths
+                            </span>
+                        </div>
+
+                        {filteredPaths.length > 0 ? (
+                            <div className="pathsGrid">
+                                {filteredPaths.map(path => (
+                                    <div key={path.id} className="pathCard">
+                                        <div className="cardHeader">
+                                            <div className="cardTitle">{path.title}</div>
+                                            <div
+                                                className="difficultyBadge"
+                                                style={{ backgroundColor: getDifficultyColor(path.difficulty) }}
+                                            >
+                                                {path.difficulty}
+                                            </div>
+                                        </div>
+
+                                        <div className="cardContent">
+                                            <p className="cardDescription">{path.description}</p>
+
+                                            <div className="instructorRow">
+                                                <div className="instructorInfo">
+                                                    👨‍🏫 {path.instructor}
+                                                </div>
+                                                <div className="ratingInfo">
+                                                    <span className="stars">
+                                                        {renderStars(path.rating)}
+                                                    </span>
+                                                    <span className="ratingText">
+                                                        {path.rating} ({path.totalRatings})
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="cardMeta">
+                                                <div className="metaItem">📚 {path.coursesCount} courses</div>
+                                                <div className="metaItem">👥 {path.enrolledCount} enrolled</div>
+                                                <div className="metaItem">⏱️ {path.estimatedHours}h</div>
+                                                <div className="metaItem">🏷️ {path.category}</div>
+                                            </div>
+
+                                            {path.isEnrolled && path.progress > 0 && (
+                                                <div className="progressSection">
+                                                    <div className="progressLabel">
+                                                        Tiến độ: {path.progress}%
+                                                    </div>
+                                                    <div className="progressBar">
+                                                        <div
+                                                            className="progressFill"
+                                                            style={{ width: `${path.progress}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="cardActions">
+                                            <button
+                                                className="detailButton"
+                                                onClick={() => navigate(`/learning-paths/${path.id}`)}
+                                            >
+                                                Xem chi tiết
+                                            </button>
+
+                                            {!path.isEnrolled ? (
+                                                <button
+                                                    className="enrollButton"
+                                                    onClick={() => handleEnroll(path.id)}
+                                                >
+                                                    Đăng ký học
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="continueButton"
+                                                    onClick={() => navigate(`/learning-paths/${path.id}/continue`)}
+                                                >
+                                                    Tiếp tục học
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="emptyState">
+                                <div className="emptyIcon">🔍</div>
+                                <h3 className="emptyTitle">Không tìm thấy learning path nào</h3>
+                                <p className="emptyText">
+                                    Thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm
+                                </p>
+                                <button className="resetBtn" onClick={resetFilters}>
+                                    🔄 Reset bộ lọc
+                                </button>
+                            </div>
+                        )}
+                    </section>
+                </main>
             </div>
-        </Layout>
+        </Layout >
     );
 }
 

@@ -31,7 +31,7 @@ function Sidebar({ user, onLogout }) {
                 { id: 'courses', label: 'Khóa học', icon: '📚', path: '/courses' },
                 // { id: 'learning', label: 'Learning Paths', icon: '📖', path: '/admin/learning-paths' },
                 { id: 'users', label: 'Người dùng', icon: '👥', path: '/admin/users' },
-                { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
+                // { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
                 { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },
                 { id: 'settings', label: 'Cài đặt', icon: '⚙️', path: '/settings' },
             ];
@@ -42,7 +42,7 @@ function Sidebar({ user, onLogout }) {
             ...commonItems,
             { id: 'courses', label: 'Khóa học', icon: '📚', path: '/courses' },
             { id: 'learning', label: 'Học tập', icon: '📖', path: '/learning' },
-            { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
+            // { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
             { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },
             { id: 'settings', label: 'Cài đặt', icon: '⚙️', path: '/settings' },
         ];
