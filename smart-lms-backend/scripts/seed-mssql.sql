@@ -2063,4 +2063,22 @@ DECLARE
     COMMIT;
  
     -- ROLLBACK;
-    GO
+    GO    
+ -- Sử dụng database của bạn
+    USE SMART_LMS;
+    GO     CREATE TABLE LESSONS ( ID INT IDENTITY(1, 1) PRIMARY KEY, -- Khóa chính tự tăng
+    COURSE_ID INT NOT NULL, -- Khóa ngoại liên kết đến bảng Courses
+    TITLE NVARCHAR(255) NOT NULL, -- Tiêu đề bài học
+    DURATION_MINUTES INT NOT NULL DEFAULT 0, -- Thời lượng bài học (phút)
+    POSITION INT NOT NULL, -- Thứ tự bài học trong khóa học
+    IS_PREVIEW_ALLOWED BIT NOT NULL DEFAULT 0, -- Cho phép xem trước (0: không, 1: có)
+    CREATED_AT DATETIME DEFAULT GETDATE(), -- Ngày tạo
+    UPDATED_AT DATETIME DEFAULT GETDATE(), -- Ngày cập nhật
+    CONSTRAINT FK_LESSONS_COURSES FOREIGN KEY (COURSE_ID) REFERENCES COURSES(ID) ON DELETE CASCADE );
+ 
+    -- Seed bài học cho Course ID = 1 (JavaScript Fundamentals)
+    INSERT INTO DBO.LESSONS ( COURSE_ID, TITLE, DURATION_MINUTES, POSITION, IS_PREVIEW_ALLOWED ) VALUES ( 1, N'Bài 1: Giới thiệu về JavaScript và Lịch sử', 15, 1, 1 ), ( 1, N'Bài 2: Biến, Kiểu dữ liệu và Toán tử', 25, 2, 1 ), ( 1, N'Bài 3: Cấu trúc điều kiện If-Else và Switch-Case', 30, 3, 0 ), ( 1, N'Bài 4: Vòng lặp For và While', 20, 4, 0 ), ( 1, N'Bài 5: Hàm và Phạm vi biến (Scope)', 35, 5, 0 );
+ 
+    -- Seed bài học cho Course ID = 2 (Python for Beginners)
+    INSERT INTO DBO.LESSONS ( COURSE_ID, TITLE, DURATION_MINUTES, POSITION, IS_PREVIEW_ALLOWED ) VALUES ( 2, N'Bài 1: Cài đặt Python và môi trường phát triển', 20, 1, 1 ), ( 2, N'Bài 2: Cú pháp cơ bản và chương trình đầu tiên', 15, 2, 0 ), ( 2, N'Bài 3: Các kiểu dữ liệu cơ bản', 25, 3, 0 ), ( 2, N'Bài 4: Cấu trúc dữ liệu List, Tuple, Dictionary', 40, 4, 0 );
+    PRINT  'Đã seed dữ liệu mẫu cho bảng Lessons!';
