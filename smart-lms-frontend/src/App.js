@@ -10,6 +10,7 @@ import InstructorLearningPaths from './pages/InstructorLearningPaths';
 import PrivateRoute from './components/PrivateRoute';
 import Analytics from './pages/Analytics';
 import Courses from './pages/Courses';
+import CourseDetail from './pages/CourseDetail'; // 1. Đảm bảo đã import trang chi tiết
 
 function App() {
   return (
@@ -19,68 +20,39 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         {/* === CÁC ROUTE ĐƯỢC BẢO VỆ === */}
-
         <Route
           path="/dashboard"
-          element={
-            <PrivateRoute>
-              <DashboardRouter />
-            </PrivateRoute>
-          }
+          element={<PrivateRoute><DashboardRouter /></PrivateRoute>}
         />
 
-        {/* SỬA LỖI: Thêm lại route cho trang Khóa học */}
-        <Route
-          path="/courses/search"
-          element={
-            <PrivateRoute>
-              <CourseSearchFilter />
-            </PrivateRoute>
-          }
-        />
+        {/* --- CÁC ROUTE CHO KHÓA HỌC (COURSES) --- */}
+        <Route path="/courses" element={<PrivateRoute><Courses /></PrivateRoute>} />
+        <Route path="/courses/:id" element={<PrivateRoute><CourseDetail /></PrivateRoute>} />
 
+        {/* ==================================================================== */}
 
-        <Route
-          path="/courses"
-          element={
-            <PrivateRoute>
-              <Courses />
-            </PrivateRoute>
-          }
-        />
-
+        {/* --- CÁC ROUTE CHO LỘ TRÌNH HỌC (LEARNING PATHS) --- */}
         <Route
           path="/learning"
-          element={
-            <PrivateRoute>
-              <LearningPath />
-            </PrivateRoute>
-          }
+          element={<PrivateRoute><LearningPath /></PrivateRoute>}
         />
-
         <Route
-          path="/learning-paths/:id" // Đảm bảo dùng :id như đã thống nhất
-          element={
-            <PrivateRoute>
-              <LearningPathDetailPage />
-            </PrivateRoute>
-          }
+          path="/learning-paths/:id"
+          element={<PrivateRoute><LearningPathDetailPage /></PrivateRoute>}
         />
-
         <Route
           path="/instructor/learning-paths"
-          element={
-            <PrivateRoute>
-              <InstructorLearningPaths />
-            </PrivateRoute>
-          }
+          element={<PrivateRoute><InstructorLearningPaths /></PrivateRoute>}
         />
 
-        <Route path="/analytics" element={<Analytics />} />
+        {/* --- ROUTE CHO PHÂN TÍCH (ANALYTICS) --- */}
+        <Route
+          path="/analytics"
+          element={<PrivateRoute><Analytics /></PrivateRoute>}
+        />
 
         {/* === ROUTE MẶC ĐỊNH === */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
       </Routes>
     </Router>
   );
