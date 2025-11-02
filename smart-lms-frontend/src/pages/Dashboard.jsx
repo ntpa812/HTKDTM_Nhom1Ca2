@@ -6,6 +6,7 @@ import Sidebar from '../components/layout/Sidebar';
 import RecentActivities from '../components/dashboard/RecentActivities';
 import UpcomingDeadlines from '../components/dashboard/UpcomingDeadlines';
 import PerformanceMetrics from '../components/dashboard/PerformanceMetrics';
+import AIPredictionCard from '../components/dashboard/AIPredictionCard';
 import './Dashboard.css';
 
 function Dashboard() {
@@ -17,7 +18,8 @@ function Dashboard() {
         stats: null,
         progressData: [],
         knowledgeGapData: [],
-        recommendedCourses: []
+        recommendedCourses: [],
+        aiPrediction: null
     });
 
     useEffect(() => {
@@ -45,11 +47,12 @@ function Dashboard() {
 
             console.log('📡 Fetching dashboard data...'); // START FETCH
 
-            const [statsRes, progressRes, knowledgeRes, recommendRes] = await Promise.all([
+            const [statsRes, progressRes, knowledgeRes, recommendRes, aiRes] = await Promise.all([
                 axios.get('http://localhost:5000/api/dashboard/stats', { headers }),
                 axios.get('http://localhost:5000/api/dashboard/progress', { headers }),
                 axios.get('http://localhost:5000/api/dashboard/knowledge-gap', { headers }),
-                axios.get('http://localhost:5000/api/dashboard/recommendations', { headers })
+                axios.get('http://localhost:5000/api/dashboard/recommendations', { headers }),
+                axios.get('http://localhost:5000/api/dashboard/ai-prediction', { headers }) // Gọi API mới
             ]);
 
             console.log('✅ Stats:', statsRes.data); // CHECK RESPONSE
@@ -61,11 +64,15 @@ function Dashboard() {
                 stats: statsRes.data.data,
                 progressData: progressRes.data.data,
                 knowledgeGapData: knowledgeRes.data.data,
-                recommendedCourses: recommendRes.data.data
+                recommendedCourses: recommendRes.data.data,
+                aiPrediction: aiRes.data.data
             });
         } catch (error) {
             console.error('❌ Error loading dashboard data:', error.response || error);
             // Fallback to mock data...
+            if (error.config.url.includes('ai-prediction')) {
+                setDashboardData(prev => ({ ...prev, aiPrediction: null }));
+            }
         } finally {
             setLoading(false);
         }
@@ -147,20 +154,7 @@ function Dashboard() {
                                 </ResponsiveContainer>
                             </div>
 
-                            <div className="dashboard-chart-card">
-                                <h3 className="dashboard-chart-title">🎯 Phân tích lỗ hổng kiến thức</h3>
-                                <ResponsiveContainer width="100%" height={250}>
-                                    <BarChart data={dashboardData.knowledgeGapData}>
-                                        <CartesianGrid strokeDasharray="3 3" stroke="#e8eaff" />
-                                        <XAxis dataKey="subject" stroke="#667eea" />
-                                        <YAxis stroke="#667eea" />
-                                        <Tooltip />
-                                        <Legend />
-                                        <Bar dataKey="mastery" fill="#10B981" name="Mức độ thành thạo" />
-                                        <Bar dataKey="gap" fill="#EF4444" name="Lỗ hổng" />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </div>
+                            <AIPredictionCard prediction={dashboardData.aiPrediction} />
 
                             <PerformanceMetrics />
                         </div>

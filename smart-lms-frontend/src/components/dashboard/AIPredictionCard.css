@@ -1,0 +1,61 @@
+/* AIPredictionCard.css */
+.ai-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e8eaff;
+}
+
+.ai-card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 20px;
+}
+
+.ai-card-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.ai-prediction-chart {
+    flex: 1;
+    min-width: 200px;
+}
+
+.ai-prediction-summary {
+    flex: 1;
+}
+
+.ai-summary-label {
+    font-size: 0.9rem;
+    color: #64748B;
+    margin-bottom: 4px;
+}
+
+.ai-summary-grade {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.ai-summary-cluster {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #4f46e5;
+    margin-bottom: 8px;
+}
+
+.ai-summary-advice {
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.5;
+}
+
+.ai-card-loading {
+    text-align: center;
+    padding: 40px 20px;
+    color: #64748B;
+}
