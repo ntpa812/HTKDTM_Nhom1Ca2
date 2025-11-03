@@ -17,10 +17,10 @@ function Sidebar({ user, onLogout }) {
             return [
                 ...commonItems,
                 { id: 'courses', label: 'Khóa học', icon: '📚', path: '/courses' },
-                { id: 'learning', label: 'Learning Paths', icon: '📖', path: '/instructor/learning-paths' },
-                { id: 'students', label: 'Học viên', icon: '👥', path: '/instructor/students' },
-                { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
-                { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },
+                { id: 'learning', label: 'Lộ trình', icon: '📖', path: '/instructor/learning-paths' },
+                // { id: 'students', label: 'Học viên', icon: '👥', path: '/instructor/students' },
+                // { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
+                // { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },
                 { id: 'settings', label: 'Cài đặt', icon: '⚙️', path: '/settings' },
             ];
         }
@@ -29,10 +29,10 @@ function Sidebar({ user, onLogout }) {
             return [
                 ...commonItems,
                 { id: 'courses', label: 'Khóa học', icon: '📚', path: '/courses' },
-                // { id: 'learning', label: 'Learning Paths', icon: '📖', path: '/admin/learning-paths' },
-                { id: 'users', label: 'Người dùng', icon: '👥', path: '/admin/users' },
-                // { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
-                { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },
+                // { id: 'learning', label: 'Lộ trình', icon: '📖', path: '/admin/learning-paths' },
+                // { id: 'users', label: 'Người dùng', icon: '👥', path: '/admin/users' },
+                { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
+                // { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },
                 { id: 'settings', label: 'Cài đặt', icon: '⚙️', path: '/settings' },
             ];
         }
@@ -40,7 +40,7 @@ function Sidebar({ user, onLogout }) {
         // Student (default)
         return [
             ...commonItems,
-            { id: 'learning', label: 'Học tập', icon: '📖', path: '/learning' },
+            { id: 'learning', label: 'Lộ trình', icon: '📖', path: '/learning' },
             { id: 'courses', label: 'Khóa học', icon: '📚', path: '/courses' },
             // { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
             // { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },

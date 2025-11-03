@@ -273,3 +273,242 @@
         width: 100%;
     }
 }
+
+.lesson-description {
+    padding: 16px 20px;
+    background-color: #f9fafb;
+    /* nền nhạt, dễ đọc */
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #374151;
+    margin-bottom: 20px;
+    /* khoảng cách với các phần khác */
+}
+
+/* Style cho nút "Mark Complete" */
+.mark-complete-btn {
+    display: inline-block;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #4f46e5, #6b46c1);
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    transition: background 0.3s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.2);
+    margin-bottom: 20px;
+    /* khoảng cách rõ ràng với nội dung mô tả */
+}
+
+.mark-complete-btn:hover {
+    background: linear-gradient(135deg, #6b46c1, #4f46e5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(79, 70, 229, 0.3);
+}
+
+/* LESSON DESCRIPTION - Thiết kế mới */
+.lesson-description {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Accent border cho description */
+.lesson-description::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.lesson-description h3 {
+    color: #667eea;
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lesson-description h3::before {
+    content: '📝';
+    font-size: 16px;
+}
+
+.lesson-description p {
+    color: #4a5568;
+    line-height: 1.7;
+    font-size: 16px;
+    margin: 0 0 20px 0;
+    text-align: justify;
+}
+
+/* LESSON META - Cải tiến */
+.lesson-meta {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.lesson-duration {
+    background: #eef2ff;
+    color: #667eea;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.lesson-status {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-completed {
+    background: #d1fae5;
+    color: #065f46;
+    box-shadow: 0 2px 4px rgba(16, 185, 129, 0.1);
+}
+
+.status-in_progress {
+    background: #fef3c7;
+    color: #92400e;
+    box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+}
+
+.status-not_started {
+    background: #f3f4f6;
+    color: #6b7280;
+    box-shadow: 0 2px 4px rgba(107, 114, 128, 0.1);
+}
+
+/* === VIDEO CONTAINER STYLING === */
+.video-container {
+    width: 100%;
+    margin-bottom: 24px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border: 3px solid #e8eaff;
+    transition: all 0.3s ease;
+}
+
+.video-container:hover {
+    border-color: #667eea;
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
+}
+
+.youtube-iframe {
+    width: 100%;
+    height: 450px;
+    /* Tăng chiều cao từ 400px */
+    border: none;
+    display: block;
+}
+
+/* VIDEO PLACEHOLDER - Cải tiến */
+.video-placeholder {
+    width: 100%;
+    height: 450px;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 2px dashed #cbd5e0;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.placeholder-content {
+    text-align: center;
+    color: #a0aec0;
+}
+
+.placeholder-content p {
+    font-size: 64px;
+    margin: 0 0 12px 0;
+    opacity: 0.7;
+}
+
+.placeholder-content span {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* === COMPLETED LESSON STYLING === */
+.lesson-header .mark-complete-btn.completed {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+    cursor: default;
+    transform: none;
+}
+
+.lesson-header .mark-complete-btn.completed:hover {
+    transform: none;
+    box-shadow: 0 2px 8px rgba(107, 114, 128, 0.2);
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+
+/* === RESPONSIVE ADJUSTMENTS === */
+@media (max-width: 1200px) {
+    .lesson-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .lesson-header h2 {
+        margin-right: 0;
+    }
+
+    .mark-complete-btn {
+        align-self: flex-end;
+    }
+}
+
+@media (max-width: 768px) {
+    .youtube-iframe {
+        height: 250px;
+    }
+
+    .video-placeholder {
+        height: 250px;
+    }
+
+    .lesson-description {
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .lesson-meta {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .mark-complete-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
