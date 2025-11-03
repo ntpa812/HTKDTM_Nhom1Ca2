@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Sidebar from '../components/layout/Sidebar';
-import RecentActivities from '../components/dashboard/RecentActivities';
+// import RecentActivities from '../components/dashboard/RecentActivities';
 import UpcomingDeadlines from '../components/dashboard/UpcomingDeadlines';
 import PerformanceMetrics from '../components/dashboard/PerformanceMetrics';
 import AIPredictionCard from '../components/dashboard/AIPredictionCard';
+import RecommendationCard from '../components/common/RecommendationCard';
 import './Dashboard.css';
 
-// === FAKE DATA CHO DASHBOARD ===
 const FAKE_DASHBOARD_DATA = {
     stats: {
         activeEnrollments: 4,
@@ -118,7 +118,6 @@ function Dashboard() {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
-    // State từ code cũ - giữ nguyên
     const [dashboardData, setDashboardData] = useState({
         stats: null,
         progressData: [],
@@ -161,6 +160,24 @@ function Dashboard() {
         setTimeSeriesData(buildFakeTimeSeries(timePeriod));
     }, [timePeriod]);
 
+    useEffect(() => {
+        const fetchRecommendedPaths = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) return;
+                const config = { headers: { Authorization: `Bearer ${token}` } };
+                const res = await axios.get('http://localhost:5000/api/learning-paths/recommendations', config);
+                if (res.data.success) {
+                    setDashboardData(prev => ({ ...prev, recommendedPaths: res.data.data || [] }));
+                }
+            } catch (e) {
+                console.error('Error fetching recommended paths:', e);
+            }
+        };
+        fetchRecommendedPaths();
+    }, []);
+
+
     const loadUserData = async () => {
         try {
             const userData = localStorage.getItem('user');
@@ -175,30 +192,39 @@ function Dashboard() {
     const loadDashboardData = async () => {
         try {
             const token = localStorage.getItem('token');
-            console.log('🔑 Token:', token);
-
-            // Kiểm tra token trước khi gọi API
             if (!token) {
                 navigate('/login');
                 return;
             }
 
-            console.log('📡 Sử dụng fake data cho dashboard...');
+            const headers = { Authorization: `Bearer ${token}` };
 
-            // Simulate loading time
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            // Gọi song song dashboard data và recommendations
+            const [dashboardRes, recommendationsRes] = await Promise.all([
+                axios.get('http://localhost:5000/api/dashboard', { headers }),
+                axios.get('http://localhost:5000/api/learning-paths/recommendations', { headers })
+            ]);
 
-            // Sử dụng fake data thay vì gọi API
-            setDashboardData(FAKE_DASHBOARD_DATA);
+            // Merge data lại với nhau
+            const finalData = {
+                ...dashboardRes.data,
+                recommendedPaths: recommendationsRes.data.success ? recommendationsRes.data.data : []
+            };
+
+            setDashboardData(finalData);
 
         } catch (error) {
             console.error('❌ Error loading dashboard data:', error.response || error);
-            // Fallback to fake data
-            setDashboardData(FAKE_DASHBOARD_DATA);
+            // Fallback về fake data
+            setDashboardData({
+                ...FAKE_DASHBOARD_DATA,
+                recommendedPaths: FAKE_DASHBOARD_DATA.recommendedPaths || []
+            });
         } finally {
             setLoading(false);
         }
     };
+
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -234,66 +260,82 @@ function Dashboard() {
                     </div>
                 </header>
 
-                <div className="dashboard-content">
-                    {/* AI Prediction Card - Thêm vào đầu */}
-                    {dashboardData.aiPrediction && (
-                        <AIPredictionCard prediction={dashboardData.aiPrediction} />
-                    )}
-
-                    <div className="dashboard-stats-grid">
-                        <StatCard
-                            title="Khóa học đang học"
-                            value={dashboardData.stats?.activeEnrollments || "0"}
-                            change="+2"
-                            color="#667eea"
-                        />
-                        <StatCard
-                            title="Bài tập hoàn thành"
-                            value={dashboardData.stats?.completedAssignments || "0"}
-                            change="+8"
-                            color="#10B981"
-                        />
-                        <StatCard
-                            title="Điểm trung bình"
-                            value={dashboardData.stats?.averageScore || "0"}
-                            change="+0.3"
-                            color="#764ba2"
-                        />
-                        <StatCard
-                            title="Thời gian học"
-                            value={dashboardData.stats?.totalStudyTime || "0h"}
-                            change="+12h"
-                            color="#F59E0B"
-                        />
+                {/* Section đầu tiên: StatCards (trái) + AIPredictionCard (phải) */}
+                <div className="dashboard-header-section">
+                    <div className="stats-column">
+                        <div className="dashboard-stats-grid">
+                            <StatCard
+                                title="Khóa học đang học"
+                                value={dashboardData.stats?.activeEnrollments || "0"}
+                                change="+2"
+                                color="#667eea"
+                            />
+                            <StatCard
+                                title="Bài tập hoàn thành"
+                                value={dashboardData.stats?.completedAssignments || "0"}
+                                change="+8"
+                                color="#10B981"
+                            />
+                            <StatCard
+                                title="Điểm trung bình"
+                                value={dashboardData.stats?.averageScore || "0"}
+                                change="+0.3"
+                                color="#764ba2"
+                            />
+                            <StatCard
+                                title="Thời gian học"
+                                value={dashboardData.stats?.totalStudyTime || "0h"}
+                                change="+12h"
+                                color="#F59E0B"
+                            />
+                        </div>
                     </div>
 
-                    <div className="dashboard-main-grid">
-                        <div className="dashboard-charts-column">
-                            {/* THAY ĐỔI: Tiến độ học tập -> Hoạt động học tập theo thời gian (Learning Path Analytics) */}
-                            <div className="dashboard-chart-card">
-                                <div className="time-period-selector">
-                                    <h3 className="dashboard-chart-title">📈 Hoạt động học tập theo thời gian</h3>
-                                    <div className="time-period-buttons">
-                                        {[7, 30, 90].map(period => (
-                                            <button
-                                                key={period}
-                                                className={`time-btn ${timePeriod === period ? 'active' : ''}`}
-                                                onClick={() => setTimePeriod(period)}
-                                            >
-                                                {period} ngày
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                    <div className="ai-column">
+                        <AIPredictionCard prediction={dashboardData.aiPrediction} />
+                    </div>
+                </div>
 
-                                {/* Badge demo data */}
-                                <div className="demo-badge">
-                                    {/* <span className="demo-text">📊 Demo Data</span> */}
-                                </div>
 
-                                <TimeSeriesChart data={timeSeriesData} />
+                <div className="dashboard-main-grid">
+                    <div className="dashboard-charts-column">
+                        {/* THAY ĐỔI: Tiến độ học tập -> Hoạt động học tập theo thời gian (Learning Path Analytics) */}
+                        <div className="dashboard-chart-card">
+                            <div className="time-period-selector">
+                                <h3 className="dashboard-chart-title">📈 Hoạt động học tập theo thời gian</h3>
+                                <div className="time-period-buttons">
+                                    {[7, 30, 90].map(period => (
+                                        <button
+                                            key={period}
+                                            className={`time-btn ${timePeriod === period ? 'active' : ''}`}
+                                            onClick={() => setTimePeriod(period)}
+                                        >
+                                            {period} ngày
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            {/* 
+
+                            {/* Badge demo data */}
+                            <div className="demo-badge">
+                                {/* <span className="demo-text">📊 Demo Data</span> */}
+                            </div>
+
+                            <TimeSeriesChart data={timeSeriesData} />
+
+
+                        </div>
+
+
+                        <div className="dashboard-recommend-card">
+                            <h3 className="dashboard-recommend-title">✨ Lộ trình học tập được đề xuất</h3>
+                            <div className="recommendations-grid">
+                                {(dashboardData.recommendedPaths || []).map((path) => (
+                                    <RecommendationCard key={`rec-${path.id}`} path={path} />
+                                ))}
+                            </div>
+                        </div>
+                        {/* 
                             <div className="dashboard-chart-card">
                                 <h3 className="dashboard-chart-title">🎯 Phân tích lỗ hổng kiến thức</h3>
                                 <ResponsiveContainer width="100%" height={250}>
@@ -309,39 +351,17 @@ function Dashboard() {
                                 </ResponsiveContainer>
                             </div> */}
 
-                            <PerformanceMetrics />
-                        </div>
+                        {/* <PerformanceMetrics /> */}
+                    </div>
 
-                        <div className="dashboard-activities-column">
-                            <UpcomingDeadlines />
+                    <div className="dashboard-activities-column">
+                        <UpcomingDeadlines />
 
-                            <div className="dashboard-recommend-card">
-                                <h3 className="dashboard-recommend-title">🤖 Khóa học được đề xuất (AI)</h3>
-                                <div className="dashboard-courses-list">
-                                    {dashboardData.recommendedCourses.map((course) => (
-                                        <div key={course.id} className="dashboard-course-item">
-                                            <div className="dashboard-course-info">
-                                                <h4 className="dashboard-course-title">{course.title}</h4>
-                                                <p className="dashboard-course-difficulty">Độ khó: {course.difficulty}</p>
-                                            </div>
-                                            <div className="dashboard-course-actions">
-                                                <div className="dashboard-match-info">
-                                                    <p className="dashboard-match-label">Độ phù hợp</p>
-                                                    <p className="dashboard-match-value">{course.match}%</p>
-                                                </div>
-                                                <button className="dashboard-start-btn">Bắt đầu học</button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
 
-                            <RecentActivities />
-                        </div>
                     </div>
                 </div>
-            </main>
-        </div>
+            </main >
+        </div >
     );
 }
 

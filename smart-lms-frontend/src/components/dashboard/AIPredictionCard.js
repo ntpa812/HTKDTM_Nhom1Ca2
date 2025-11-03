@@ -44,14 +44,14 @@ const AIPredictionCard = ({ prediction }) => {
             <h3 className="ai-card-title">🔮 Phân tích & Dự đoán từ AI</h3>
             <div className="ai-card-content">
                 <div className="ai-prediction-chart">
-                    <ResponsiveContainer width="100%" height={180}>
+                    <ResponsiveContainer width="100%" height={220}>
                         <PieChart>
                             <Pie
                                 data={chartData}
                                 cx="50%"
                                 cy="50%"
                                 labelLine={false}
-                                outerRadius={80}
+                                outerRadius={85} // Tăng từ 80 lên 85
                                 fill="#8884d8"
                                 dataKey="value"
                                 nameKey="name"
@@ -66,6 +66,7 @@ const AIPredictionCard = ({ prediction }) => {
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
+
                 <div className="ai-prediction-summary">
                     <p className="ai-summary-label">Kết quả dự đoán:</p>
                     <p className="ai-summary-grade" style={{ color: COLORS[predicted_grade] }}>
