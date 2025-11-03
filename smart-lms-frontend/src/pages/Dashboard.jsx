@@ -165,16 +165,78 @@ function Dashboard() {
     }, []);
 
     // ✅ ADD: New function to fetch real AI prediction
+    // const fetchAIPrediction = async () => {
+    //     try {
+    //         setAiLoading(true);
+    //         const token = localStorage.getItem('token');
+
+    //         if (!token) return;
+
+    //         // Get current user ID (adjust based on your user storage)
+    //         const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
+    //         const userId = userInfo.id || 5; // Default to 5 for testing
+
+    //         console.log(`🤖 Fetching AI prediction for user: ${userId}`);
+
+    //         const response = await axios.get(`/api/dashboard/ai-prediction/${userId}`, {
+    //             headers: { Authorization: `Bearer ${token}` }
+    //         });
+
+    //         console.log('✅ AI Prediction response:', response.data);
+
+    //         if (response.data.success) {
+    //             // Transform backend data to frontend format
+    //             const backendData = response.data.data;
+    //             const transformedData = {
+    //                 status: 'success',
+    //                 cluster: backendData.prediction_summary?.cluster_group || 2,
+    //                 predicted_grade: backendData.prediction_summary?.performance_level || 'Khá',
+    //                 probabilities: backendData.detailed_analysis?.grade_probabilities || {
+    //                     'Giỏi': 15,
+    //                     'Khá': 65,
+    //                     'Trung bình': 18,
+    //                     'Yếu': 2
+    //                 },
+    //                 recommendations: [
+    //                     backendData.recommendations?.study_approach || "Phương pháp học tập phù hợp",
+    //                     "Focus: " + (backendData.recommendations?.focus_areas?.join(', ') || "Cải thiện kỹ năng"),
+    //                     backendData.recommendations?.next_steps || "Tiếp tục phát triển"
+    //                 ]
+    //             };
+
+    //             setAiPrediction(transformedData);
+    //         }
+
+    //     } catch (err) {
+    //         console.error('❌ AI prediction error:', err);
+    //         // Fallback to fake data
+    //         setAiPrediction({
+    //             status: 'error',
+    //             cluster: 2,
+    //             predicted_grade: 'Khá (Fallback)',
+    //             probabilities: {
+    //                 'Giỏi': 15,
+    //                 'Khá': 65,
+    //                 'Trung bình': 18,
+    //                 'Yếu': 2
+    //             },
+    //             recommendations: [
+    //                 "AI service unavailable - using fallback data",
+    //                 "Please check backend connection",
+    //                 "Contact administrator if problem persists"
+    //             ]
+    //         });
+    //     } finally {
+    //         setAiLoading(false);
+    //     }
+    // };
+
     const fetchAIPrediction = async () => {
         try {
             setAiLoading(true);
             const token = localStorage.getItem('token');
-
-            if (!token) return;
-
-            // Get current user ID (adjust based on your user storage)
             const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
-            const userId = userInfo.id || 5; // Default to 5 for testing
+            const userId = userInfo.id || 5;
 
             console.log(`🤖 Fetching AI prediction for user: ${userId}`);
 
@@ -182,54 +244,55 @@ function Dashboard() {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            console.log('✅ AI Prediction response:', response.data);
-
             if (response.data.success) {
-                // Transform backend data to frontend format
                 const backendData = response.data.data;
+
+                // ✅ FIX: Convert to proper decimal format for pie chart
+                const probabilities = backendData.detailed_analysis?.grade_probabilities || {};
+
                 const transformedData = {
                     status: 'success',
                     cluster: backendData.prediction_summary?.cluster_group || 2,
                     predicted_grade: backendData.prediction_summary?.performance_level || 'Khá',
-                    probabilities: backendData.detailed_analysis?.grade_probabilities || {
-                        'Giỏi': 15,
-                        'Khá': 65,
-                        'Trung bình': 18,
-                        'Yếu': 2
+                    // ✅ Convert to decimals (0-1) for pie chart
+                    probabilities: {
+                        'Xuất sắc': (probabilities['Xuất sắc'] || 10) / 100,    // 0.10
+                        'Giỏi': (probabilities['Giỏi'] || 15) / 100,            // 0.15  
+                        'Khá': (probabilities['Khá'] || 65) / 100,              // 0.65
+                        'Trung bình': (probabilities['Trung bình'] || 10) / 100, // 0.10
+                        'Yếu': 0.02
                     },
                     recommendations: [
-                        backendData.recommendations?.study_approach || "Phương pháp học tập phù hợp",
-                        "Focus: " + (backendData.recommendations?.focus_areas?.join(', ') || "Cải thiện kỹ năng"),
-                        backendData.recommendations?.next_steps || "Tiếp tục phát triển"
+                        backendData.recommendations?.study_approach || "Study approach",
+                        "Focus: " + (backendData.recommendations?.focus_areas?.join(', ') || "Focus areas"),
+                        backendData.recommendations?.next_steps || "Next steps"
                     ]
                 };
 
+                console.log('✅ Transformed AI data:', transformedData);
                 setAiPrediction(transformedData);
             }
 
         } catch (err) {
             console.error('❌ AI prediction error:', err);
-            // Fallback to fake data
+            // Fallback data
             setAiPrediction({
                 status: 'error',
                 cluster: 2,
                 predicted_grade: 'Khá (Fallback)',
                 probabilities: {
-                    'Giỏi': 15,
-                    'Khá': 65,
-                    'Trung bình': 18,
-                    'Yếu': 2
+                    'Giỏi': 0.15,      // ← Correct decimal format
+                    'Khá': 0.65,       // ← Not 6500%
+                    'Trung bình': 0.18, // ← Not 1800%
+                    'Yếu': 0.02
                 },
-                recommendations: [
-                    "AI service unavailable - using fallback data",
-                    "Please check backend connection",
-                    "Contact administrator if problem persists"
-                ]
+                recommendations: ["Fallback recommendations"]
             });
         } finally {
             setAiLoading(false);
         }
     };
+
     useEffect(() => { fetchAIPrediction(); }, []);
 
     const loadUserData = async () => {

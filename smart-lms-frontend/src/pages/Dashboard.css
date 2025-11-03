@@ -311,3 +311,65 @@
     font-size: 18px;
     color: #ef4444;
 }
+
+/* Main Grid - Charts + Activities - SỬA LẠI */
+.dashboard-main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    margin: 32px;
+    margin-top: 0px;
+    /* BỎ align-items: stretch để các column tự điều chỉnh */
+    align-items: start;
+    /* THÊM: Cho phép columns có chiều cao khác nhau */
+}
+
+.dashboard-charts-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.dashboard-activities-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    /* BỎ min-height hoặc height cố định nếu có */
+}
+
+/* Đảm bảo card tự điều chỉnh chiều cao */
+.dashboard-chart-card {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 2px solid #e8eaff;
+    /* THÊM: Cho phép chiều cao tự động */
+    height: auto;
+    min-height: auto;
+}
+
+/* Đặc biệt cho UpcomingDeadlines component */
+.upcoming-deadlines {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 2px solid #e8eaff;
+    /* THÊM: Chiều cao tự động theo nội dung */
+    height: fit-content;
+    min-height: auto;
+}
+
+.upcoming-deadlines-list {
+    /* Đảm bảo danh sách không có chiều cao cố định */
+    height: auto;
+    max-height: none;
+    overflow: visible;
+}
+
+/* Nếu có scroll trong list, chỉ áp dụng khi cần */
+.upcoming-deadlines-list.scrollable {
+    max-height: 400px;
+    overflow-y: auto;
+}
