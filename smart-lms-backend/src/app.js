@@ -1,11 +1,3 @@
-// ============================================
-// SMART LMS BACKEND - app.js
-// ============================================
-// Tác giả: Senior Full-Stack Developer
-// Ngày cập nhật: 2025-11-02
-// Mô tả: File khởi tạo và cấu hình chính cho server Express.
-// ============================================
-
 // --- 1. IMPORT CÁC MODULE CẦN THIẾT ---
 require('dotenv').config();
 const express = require('express');
@@ -16,9 +8,6 @@ const morgan = require('morgan');
 const app = express();
 
 // --- 3. CẤU HÌNH MIDDLEWARE ---
-// Middleware phải được khai báo trước các routes.
-
-// Cho phép các request từ frontend (React app)
 app.use(cors({
     origin: ['http://localhost:3000', 'http://localhost:3001'], // Cho phép cả 2 port phổ biến
     credentials: true,
@@ -37,10 +26,6 @@ if (process.env.NODE_ENV === 'development') {
 
 
 // --- 4. ĐĂNG KÝ CÁC API ROUTES ---
-// Đăng ký tường minh từng file route để tránh xung đột và dễ quản lý.
-// Express sẽ tự động nối các tiền tố này với các route con trong mỗi file.
-// Ví dụ: app.use('/api/auth', ...) và router.post('/login', ...) -> POST /api/auth/login
-
 try {
     app.use('/api/auth', require('./routes/auth'));
     app.use('/api/dashboard', require('./routes/dashboard'));
@@ -48,9 +33,7 @@ try {
     app.use('/api/learning-paths', require('./routes/learningPaths'));
     app.use('/api/analytics', require('./routes/analytics'));
     // app.use('/api/users', require('./routes/users'));
-    app.use('/api/ai', require('./routes/ai'));
-
-    // Không cần đăng ký route '/api/ai' riêng nữa vì nó đã được tích hợp vào dashboard.
+    // app.use('/api/ai', require('./routes/ai'));
 
     console.log('✅ All API routes registered successfully.');
 
@@ -90,7 +73,6 @@ app.get('/api/test-db', async (req, res) => {
 
 
 // --- 6. XỬ LÝ LỖI (ERROR HANDLING) ---
-// Middleware xử lý lỗi phải được đặt ở cuối cùng.
 
 // Handler cho các route không tồn tại (404 Not Found)
 app.use((req, res, next) => {
