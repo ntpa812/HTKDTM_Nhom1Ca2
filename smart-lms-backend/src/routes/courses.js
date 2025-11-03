@@ -48,7 +48,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
         // Lấy danh sách bài học
         const lessonsRequest = pool.request().input('courseId', sql.Int, courseId);
         const lessonsResult = await lessonsRequest.query(`
-            SELECT id, title, duration_minutes, is_preview_allowed
+            SELECT id, title, duration_minutes, is_preview_allowed, description
             FROM dbo.Lessons
             WHERE course_id = @courseId
             ORDER BY position ASC;
