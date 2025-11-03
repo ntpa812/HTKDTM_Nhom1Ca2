@@ -40,10 +40,10 @@ function Sidebar({ user, onLogout }) {
         // Student (default)
         return [
             ...commonItems,
-            { id: 'courses', label: 'Khóa học', icon: '📚', path: '/courses' },
             { id: 'learning', label: 'Học tập', icon: '📖', path: '/learning' },
+            { id: 'courses', label: 'Khóa học', icon: '📚', path: '/courses' },
             // { id: 'analytics', label: 'Thống kê', icon: '📈', path: '/analytics' },
-            { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },
+            // { id: 'ai', label: 'AI Assistant', icon: '🤖', path: '/ai-assistant' },
             { id: 'settings', label: 'Cài đặt', icon: '⚙️', path: '/settings' },
         ];
     };
@@ -295,6 +295,8 @@ const styles = {
         cursor: 'pointer',
         transition: 'all 0.3s ease'
     }
+
+
 };
 
 export default Sidebar;

@@ -41,6 +41,9 @@ const RecentActivities = () => {
             setLoading(false);
         }
     };
+    useEffect(() => {
+        fetchActivities();
+    }, []); // Chỉ chạy một lần khi component mount
 
     const getMockActivities = () => [
         {

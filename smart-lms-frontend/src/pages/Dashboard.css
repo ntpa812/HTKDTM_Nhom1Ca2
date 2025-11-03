@@ -7,12 +7,30 @@
 
 .dashboard-loading {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    width: 100%;
-    color: #667eea;
-    font-size: 24px;
-    font-weight: 600;
+    height: 100vh;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 .dashboard-main-content {
@@ -59,21 +77,50 @@
     font-size: 15px;
 }
 
-/* Content Area */
+/* Content Area - SỬA CHÍNH: CHỈ MỘT KHAI BÁO DUY NHẤT */
 .dashboard-content {
     flex: 1;
-    padding: 32px 40px;
+    padding: 40px 40px 40px 40px;
+    /* THÊM KHOẢNG CÁCH TỪ HEADER */
     overflow-y: auto;
 }
 
-/* Stats Grid */
-.dashboard-stats-grid {
+/* Section đầu tiên: StatCards trái (2x2) | AI phải */
+.dashboard-header-section {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 20px;
-    margin-bottom: 32px;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin: 32px;
+    align-items: stretch;
 }
 
+/* Stats Grid 2x2 */
+.stats-column .dashboard-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 16px;
+    margin: 0;
+}
+
+.stats-column .dashboard-stat-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+}
+
+.ai-column {
+    display: flex;
+}
+
+.ai-column .ai-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Stats Card Styles */
 .dashboard-stat-card {
     background: white;
     padding: 24px;
@@ -129,7 +176,8 @@
     display: grid;
     grid-template-columns: 2fr 1fr;
     gap: 24px;
-    margin-bottom: 32px;
+    margin: 32px;
+    margin-top: 0px;
 }
 
 .dashboard-charts-column {
@@ -159,12 +207,80 @@
     margin-bottom: 20px;
 }
 
-/* Performance Metrics Section */
-.dashboard-performance-section {
-    margin-bottom: 32px;
+/* Time Period Selector */
+.time-period-selector {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-/* Recommended Courses */
+.time-period-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.time-btn {
+    background-color: transparent;
+    border: 1px solid #d1d5db;
+    color: #4b5563;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.time-btn:hover {
+    background-color: #f3f4f6;
+}
+
+.time-btn.active {
+    background-color: #4f46e5;
+    color: #fff;
+    border-color: #4f46e5;
+}
+
+/* Demo Badge */
+.demo-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 10;
+}
+
+.demo-text {
+    background: #fef3c7;
+    color: #d97706;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid #fcd34d;
+}
+
+/* Custom Tooltip */
+.custom-tooltip {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    font-size: 14px;
+}
+
+.custom-tooltip .label {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #374151;
+}
+
+.custom-tooltip .intro {
+    margin: 2px 0;
+    font-weight: 500;
+}
+
+/* Recommended Courses/Paths */
 .dashboard-recommend-card {
     background: white;
     padding: 24px;
@@ -180,212 +296,80 @@
     margin-bottom: 20px;
 }
 
-.dashboard-courses-list {
-    display: flex;
-    flex-direction: column;
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 16px;
 }
 
-.dashboard-course-item {
+/* Error States */
+.dashboard-error {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 20px;
-    border: 2px solid #e8eaff;
-    border-radius: 12px;
-    transition: all 0.3s ease;
+    justify-content: center;
+    height: 100vh;
+    font-size: 18px;
+    color: #ef4444;
 }
 
-.dashboard-course-item:hover {
-    border-color: #667eea;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+/* Main Grid - Charts + Activities - SỬA LẠI */
+.dashboard-main-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    margin: 32px;
+    margin-top: 0px;
+    /* BỎ align-items: stretch để các column tự điều chỉnh */
+    align-items: start;
+    /* THÊM: Cho phép columns có chiều cao khác nhau */
 }
 
-.dashboard-course-info {
-    flex: 1;
-}
-
-.dashboard-course-title {
-    color: #2d3748;
-    font-size: 16px;
-    font-weight: 600;
-    margin: 0 0 4px 0;
-}
-
-.dashboard-course-difficulty {
-    color: #6c757d;
-    font-size: 14px;
-    margin: 0;
-}
-
-.dashboard-course-actions {
+.dashboard-charts-column {
     display: flex;
-    align-items: center;
+    flex-direction: column;
     gap: 24px;
 }
 
-.dashboard-match-info {
-    text-align: right;
+.dashboard-activities-column {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    /* BỎ min-height hoặc height cố định nếu có */
 }
 
-.dashboard-match-label {
-    color: #6c757d;
-    font-size: 13px;
-    margin: 0 0 4px 0;
+/* Đảm bảo card tự điều chỉnh chiều cao */
+.dashboard-chart-card {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 2px solid #e8eaff;
+    /* THÊM: Cho phép chiều cao tự động */
+    height: auto;
+    min-height: auto;
 }
 
-.dashboard-match-value {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-size: 20px;
-    font-weight: 700;
-    margin: 0;
+/* Đặc biệt cho UpcomingDeadlines component */
+.upcoming-deadlines {
+    background: white;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    border: 2px solid #e8eaff;
+    /* THÊM: Chiều cao tự động theo nội dung */
+    height: fit-content;
+    min-height: auto;
 }
 
-.dashboard-start-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.upcoming-deadlines-list {
+    /* Đảm bảo danh sách không có chiều cao cố định */
+    height: auto;
+    max-height: none;
+    overflow: visible;
 }
 
-.dashboard-start-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-    .dashboard-main-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 768px) {
-    .dashboard-main-content {
-        margin-left: 0;
-    }
-
-    .dashboard-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-
-    .dashboard-stats-grid {
-        grid-template-columns: 1fr;
-    }
-
-    /* Right column with Activities + Deadlines + Courses */
-    .dashboard-activities-column {
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
-        max-height: fit-content;
-    }
-
-    /* Recommended courses in sidebar */
-    .dashboard-activities-column .dashboard-recommend-card {
-        margin-top: 0;
-    }
-
-    .dashboard-recommend-card {
-        background: white;
-        padding: 20px;
-        border-radius: 16px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-        border: 2px solid #e8eaff;
-    }
-
-    .dashboard-recommend-title {
-        color: #667eea;
-        font-size: 18px;
-        font-weight: 700;
-        margin-bottom: 16px;
-    }
-
-    .dashboard-courses-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-    }
-
-    .dashboard-course-item {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        padding: 16px;
-        border: 2px solid #e8eaff;
-        border-radius: 12px;
-        transition: all 0.3s ease;
-    }
-
-    .dashboard-course-item:hover {
-        border-color: #667eea;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-    }
-
-    .dashboard-course-info {
-        flex: 1;
-    }
-
-    .dashboard-course-title {
-        color: #2d3748;
-        font-size: 14px;
-        font-weight: 600;
-        margin: 0 0 4px 0;
-    }
-
-    .dashboard-course-difficulty {
-        color: #6c757d;
-        font-size: 12px;
-        margin: 0;
-    }
-
-    .dashboard-course-actions {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-    }
-
-    .dashboard-match-info {
-        text-align: left;
-    }
-
-    .dashboard-match-label {
-        color: #6c757d;
-        font-size: 11px;
-        margin: 0 0 2px 0;
-    }
-
-    .dashboard-match-value {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-size: 18px;
-        font-weight: 700;
-        margin: 0;
-    }
-
-    .dashboard-start-btn {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 8px;
-        font-size: 13px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        white-space: nowrap;
-    }
+/* Nếu có scroll trong list, chỉ áp dụng khi cần */
+.upcoming-deadlines-list.scrollable {
+    max-height: 400px;
+    overflow-y: auto;
 }

@@ -1,125 +1,107 @@
-// smart-lms-backend/src/app.js
+// --- 1. IMPORT CÁC MODULE CẦN THIẾT ---
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-const { poolPromise } = require('../config/database');
 
+// --- 2. KHỞI TẠO ỨNG DỤNG EXPRESS ---
 const app = express();
 
-// ============================================
-// MIDDLEWARE - PHẢI ĐẶT ĐÚNG THỨ TỰ
-// ============================================
-// 1. CORS TRƯỚC TIÊN
+// --- 3. CẤU HÌNH MIDDLEWARE ---
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: ['http://localhost:3000', 'http://localhost:3001'], // Cho phép cả 2 port phổ biến
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// 2. BODY PARSERS
+// Xử lý dữ liệu JSON và URL-encoded
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 3. LOGGER
-app.use(morgan('dev'));
+// Ghi log các request ra console để debug (ở môi trường development)
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
 
-// ============================================
-// ROOT ENDPOINTS
-// ============================================
+
+// --- 4. ĐĂNG KÝ CÁC API ROUTES ---
+try {
+    app.use('/api/auth', require('./routes/auth'));
+    app.use('/api/dashboard', require('./routes/dashboard'));
+    app.use('/api/courses', require('./routes/courses'));
+    app.use('/api/learning-paths', require('./routes/learningPaths'));
+    app.use('/api/analytics', require('./routes/analytics'));
+    // app.use('/api/users', require('./routes/users'));
+    // app.use('/api/ai', require('./routes/ai'));
+
+    console.log('✅ All API routes registered successfully.');
+
+} catch (error) {
+    console.error('❌ FATAL ERROR: Could not load routes. One of the route files may have a syntax error.', error);
+    // Trong trường hợp một file route bị lỗi, server sẽ không khởi động để tránh các lỗi không mong muốn.
+    process.exit(1);
+}
+
+
+// --- 5. CÁC ROUTE CƠ BẢN (ROOT & TEST) ---
+
+// Route gốc để kiểm tra server có hoạt động không
 app.get('/', (req, res) => {
-    res.send('Smart LMS Backend API');
+    res.status(200).send('<h1>Smart LMS Backend API is running...</h1>');
 });
 
-// Test database connection
+// Route để kiểm tra kết nối CSDL
 app.get('/api/test-db', async (req, res) => {
     try {
+        const { poolPromise } = require('../config/database'); // Chỉ require khi cần
         const pool = await poolPromise;
-        const result = await pool.request().query('SELECT COUNT(*) as count FROM LearningPaths');
-
-        res.json({
+        const result = await pool.request().query('SELECT @@VERSION as version');
+        res.status(200).json({
             success: true,
-            message: 'Database connection OK',
-            learning_paths_count: result.recordset[0].count,
-            timestamp: new Date().toISOString()
+            message: 'Database connection is OK.',
+            data: result.recordset[0]
         });
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: 'Database connection failed',
+            message: 'Database connection failed.',
             error: error.message
         });
     }
 });
 
-// ============================================
-// API ROUTES - SAU KHI MIDDLEWARE
-// ============================================
-const apiRoutes = require('./routes');
-app.use('/api', apiRoutes);
 
-const dashboardRoutes = require('./routes/dashboard');
-app.use('/api/dashboard', dashboardRoutes);
+// --- 6. XỬ LÝ LỖI (ERROR HANDLING) ---
 
-// SỬA: Chỉ giữ 1 route cho learning paths
-app.use('/api/learning-paths', require('./routes/learningPaths'));
-
-// Loại bỏ duplicate
-// app.use('/api/paths', require('./routes/learningPaths')); // XÓA DÒNG NÀY
-
-app.use('/api/analytics', require('./routes/analytics'));
-app.use('/api/courses', require('./routes/courses'));
-
-console.log('✅ All routes registered');
-
-// ============================================
-// ERROR HANDLERS
-// ============================================
-// 404 handler
-app.use((req, res) => {
-    console.log('❌ Route not found:', req.method, req.path);
+// Handler cho các route không tồn tại (404 Not Found)
+app.use((req, res, next) => {
     res.status(404).json({
         success: false,
-        message: 'Route not found',
-        method: req.method,
-        path: req.path,
-        available_routes: [
-            'GET /api/test-db',
-            'GET /api/learning-paths',
-            'GET /api/learning-paths/categories',
-            'POST /api/learning-paths/:id/enroll'
-        ]
+        message: `Route not found: ${req.method} ${req.originalUrl}`
     });
 });
 
-// Phải có dòng này trong app.js
-app.use('/api/learning-paths', require('./routes/learningPaths'));
-
-
-// Global error handler
+// Handler xử lý tất cả các lỗi khác (Global Error Handler)
 app.use((err, req, res, next) => {
-    console.error('❌ Error:', err);
+    console.error('❌ UNHANDLED ERROR:', err);
     res.status(err.status || 500).json({
         success: false,
-        message: err.message || 'Internal Server Error',
-        error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+        message: err.message || 'An unexpected internal server error occurred.',
+        // Chỉ hiển thị stack trace ở môi trường development để bảo mật
+        stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
     });
 });
 
-// ============================================
-// START SERVER
-// ============================================
-const PORT = process.env.PORT || 5000;
 
+// --- 7. KHỞI ĐỘNG SERVER ---
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    console.log(`✅ Server running on http://localhost:${PORT}`);
-    console.log('📋 Available routes:');
-    console.log('   - GET  /api/test-db');
-    console.log('   - GET  /api/learning-paths');
-    console.log('   - GET  /api/learning-paths/categories');
-    console.log('   - POST /api/learning-paths/:id/enroll');
+    console.log(`\n🚀 Server is listening on http://localhost:${PORT}`);
+    console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
+
+// --- 8. EXPORT APP (DÙNG CHO VIỆC TEST) ---
 module.exports = app;
+

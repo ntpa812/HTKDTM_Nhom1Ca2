@@ -1,41 +1,58 @@
 const express = require('express');
 const router = express.Router();
-const { poolPromise, sql } = require('../../config/database'); // ← FIX
-const { authenticateToken } = require('../middleware/auth');
+const aiController = require('../controllers/aiController');
+const authMiddleware = require('../middleware/auth');
 
-// GET /api/ai/recommend/:userId - Get AI recommendations
-router.get('/recommend/:userId', authenticateToken, async (req, res) => {
-  try {
-    const { userId } = req.params;
+// Add request timing middleware
+router.use((req, res, next) => {
+  req.startTime = Date.now();
+  next();
+});
 
-    const pool = await poolPromise;
-    const result = await pool.request()
-      .input('userId', sql.Int, userId)
-      .query(`
-        SELECT TOP 5
-          c.id, c.title, c.description, c.difficulty, c.duration_hours, c.category,
-          r.score as recommendation_score, r.reason
-        FROM Recommendations r
-        JOIN Courses c ON r.course_id = c.id
-        WHERE r.user_id = @userId
-        ORDER BY r.score DESC, r.created_at DESC
-      `);
+/**
+ * @route GET /api/ai/health
+ * @desc Health check for AI service - NO AUTH for easy testing
+ */
+router.get('/health', aiController.healthCheck);
 
-    res.json({
-      success: true,
-      data: {
-        recommendations: result.recordset
-      }
-    });
+/**
+ * @route GET /api/ai/student/:userId/prediction
+ * @desc Get AI prediction for specific student
+ */
+router.get('/student/:userId/prediction', authMiddleware, (req, res, next) => {
+  // Authorization check
+  const requestingUserId = req.user.id;
+  const targetUserId = parseInt(req.params.userId);
 
-  } catch (error) {
-    console.error('Get recommendations error:', error);
-    res.status(500).json({
+  if (req.user.role !== 'admin' && requestingUserId !== targetUserId) {
+    return res.status(403).json({
       success: false,
-      message: 'Lỗi server',
-      error: error.message
+      error: 'Forbidden',
+      message: 'You can only access your own prediction data'
     });
   }
-});
+
+  next();
+}, aiController.getStudentPrediction);
+
+/**
+ * @route POST /api/ai/predict/custom
+ * @desc Custom prediction with provided data
+ */
+router.post('/predict/custom', authMiddleware, aiController.customPredict);
+
+/**
+ * @route POST /api/ai/predict/bulk
+ * @desc Bulk predict for multiple students (Admin only)
+ */
+router.post('/predict/bulk', authMiddleware, (req, res, next) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      error: 'Admin access required for bulk predictions'
+    });
+  }
+  next();
+}, aiController.bulkPredict);
 
 module.exports = router;
