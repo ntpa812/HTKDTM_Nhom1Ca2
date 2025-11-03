@@ -1,109 +1,66 @@
-const { spawn } = require('child_process');
-const path = require('path');
-const sql = require('mssql');
-const { poolPromise } = require('../../config/database');
-/**
- * Lấy dự đoán AI cho một sinh viên.
- * @param {number} userId - ID của sinh viên.
- * @returns {Promise<object|null>} - Một object chứa kết quả dự đoán, hoặc null nếu có lỗi.
- */
-// smart-lms-backend/src/services/aiService.js
-async function getAIPrediction(userId) {
-    try {
-        // Query đúng tên cột trong database
-        const result = await sql.query`
-            SELECT TOP 1 
-                StudyHours, 
-                AssignmentCompletionRate, 
-                QuizScore_Avg,
-                PlatformEngagement_Minutes, 
-                LearningStyle, 
-                Motivation, 
-                StressLevel,
-                FinalGrade
-            FROM dbo.StudentBehaviors 
-            WHERE UserID = ${userId} 
-            ORDER BY BehaviorID DESC`;
+import axios from 'axios';
 
-        if (result.recordset.length === 0) {
-            console.warn(`AI Service: Không tìm thấy dữ liệu hành vi cho UserID ${userId}.`);
-            return {
-                status: 'no_data',
-                message: 'Chưa có dữ liệu hành vi học tập',
-                suggestion: 'Hãy tham gia một số khóa học để hệ thống có thể đưa ra dự đoán'
-            };
+const API_BASE = '/api/ai';
+
+class AIService {
+    /**
+     * Get AI prediction for current student
+     */
+    static async getStudentPrediction(userId) {
+        try {
+            const response = await axios.get(`${API_BASE}/student/${userId}/prediction`);
+            return response.data;
+        } catch (error) {
+            throw this.handleError(error);
         }
+    }
 
-        const studentData = result.recordset[0];
-        console.log(`📊 Data for UserID ${userId}:`, studentData);
-
-        const dataString = JSON.stringify(studentData);
-        const pythonScriptPath = path.join(__dirname, '..', '..', '..', 'smart-lms-ml', 'predict.py');
-
-        return new Promise((resolve, reject) => {
-            const pythonProcess = spawn('python', [pythonScriptPath, dataString]);
-            let predictionResult = '';
-            let errorResult = '';
-
-            pythonProcess.stdout.on('data', (data) => {
-                predictionResult += data.toString();
+    /**
+     * Get analytics and trends
+     */
+    static async getStudentAnalytics(userId, period = 30) {
+        try {
+            const response = await axios.get(`${API_BASE}/analytics/${userId}`, {
+                params: { period }
             });
+            return response.data;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
 
-            pythonProcess.stderr.on('data', (data) => {
-                errorResult += data.toString();
+    /**
+     * Custom prediction
+     */
+    static async customPredict(studentData, userId = null) {
+        try {
+            const response = await axios.post(`${API_BASE}/predict/custom`, {
+                studentData,
+                userId
             });
+            return response.data;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
 
-            pythonProcess.on('close', (code) => {
-                if (errorResult) {
-                    console.error(`🔥 Python stderr cho UserID ${userId}:`, errorResult);
-                }
+    /**
+     * Check AI service health
+     */
+    static async checkHealth() {
+        try {
+            const response = await axios.get(`${API_BASE}/health`);
+            return response.data;
+        } catch (error) {
+            throw this.handleError(error);
+        }
+    }
 
-                try {
-                    const finalResult = JSON.parse(predictionResult);
-                    if (finalResult.status === 'success') {
-                        console.log(`✅ AI Prediction success cho UserID ${userId}:`, finalResult);
-                        resolve(finalResult);
-                    } else {
-                        console.error(`❌ AI Model Error cho UserID ${userId}:`, finalResult);
-                        if (finalResult.debug_info) {
-                            console.error('🔍 Debug info:', finalResult.debug_info);
-                        }
-                        resolve({
-                            status: 'model_error',
-                            message: finalResult.message,
-                            error_type: finalResult.error_type || 'unknown'
-                        });
-                    }
-                } catch (parseError) {
-                    console.error(`❌ Parse JSON error cho UserID ${userId}:`, parseError);
-                    console.error(`📄 Raw Python output:`, predictionResult);
-                    resolve({
-                        status: 'parse_error',
-                        message: 'Không thể parse kết quả từ AI model',
-                        raw_output: predictionResult
-                    });
-                }
-            });
-
-            pythonProcess.on('error', (spawnError) => {
-                console.error(`❌ Spawn error cho UserID ${userId}:`, spawnError);
-                resolve({
-                    status: 'spawn_error',
-                    message: 'Không thể chạy Python script'
-                });
-            });
-        });
-
-    } catch (err) {
-        console.error(`❌ Database error trong aiService cho UserID ${userId}:`, err.message);
-        return {
-            status: 'database_error',
-            message: 'Lỗi truy vấn database'
-        };
+    static handleError(error) {
+        const message = error.response?.data?.message || error.message || 'AI service error';
+        const status = error.response?.status || 500;
+        return new Error(`AI Service Error (${status}): ${message}`);
     }
 }
 
-
-module.exports = {
-    getAIPrediction,
-};
+export default AIService;

@@ -47,6 +47,8 @@ try {
     app.use('/api/courses', require('./routes/courses'));
     app.use('/api/learning-paths', require('./routes/learningPaths'));
     app.use('/api/analytics', require('./routes/analytics'));
+    // app.use('/api/users', require('./routes/users'));
+    app.use('/api/ai', require('./routes/ai'));
 
     // Không cần đăng ký route '/api/ai' riêng nữa vì nó đã được tích hợp vào dashboard.
 

@@ -10,7 +10,8 @@ import InstructorLearningPaths from './pages/InstructorLearningPaths';
 import PrivateRoute from './components/PrivateRoute';
 import Analytics from './pages/Analytics';
 import Courses from './pages/Courses';
-import CourseDetail from './pages/CourseDetail'; // 1. Đảm bảo đã import trang chi tiết
+import CourseDetail from './pages/CourseDetail';
+import Settings from './pages/Settings';
 
 function App() {
   return (
@@ -49,6 +50,11 @@ function App() {
         <Route
           path="/analytics"
           element={<PrivateRoute><Analytics /></PrivateRoute>}
+        />
+
+        <Route
+          path="/settings"
+          element={<PrivateRoute><Settings /></PrivateRoute>}
         />
 
         {/* === ROUTE MẶC ĐỊNH === */}
