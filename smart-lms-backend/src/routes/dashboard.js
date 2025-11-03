@@ -1,22 +1,23 @@
 // smart-lms-backend/src/routes/dashboard.js
+
 const express = require('express');
 const router = express.Router();
 const { poolPromise, sql } = require('../../config/database');
 const { authenticateToken: auth } = require('../middleware/auth');
-// const { getAIPrediction } = require('../services/aiService');
 
+// Main dashboard endpoint
 router.get('/', auth, async (req, res) => {
     try {
         const userId = req.user.id;
-        const pool = await poolPromise; // ✅ THÊM pool
+        const pool = await poolPromise;
 
         const enrolledCoursesResult = await pool.request()
             .input('user_id', sql.Int, userId)
             .query(`
-                SELECT 
-                    c.id AS ID, 
-                    c.title AS Title, 
-                    c.category AS Category, 
+                SELECT
+                    c.id AS ID,
+                    c.title AS Title,
+                    c.category AS Category,
                     e.progress AS Progress
                 FROM dbo.Enrollments e
                 JOIN dbo.Courses c ON e.course_id = c.id
@@ -26,7 +27,7 @@ router.get('/', auth, async (req, res) => {
         const statsResult = await pool.request()
             .input('user_id', sql.Int, userId)
             .query(`
-                SELECT 
+                SELECT
                     COUNT(*) as TotalCourses,
                     AVG(progress) as AverageProgress,
                     COUNT(CASE WHEN progress >= 100 THEN 1 END) as CompletedCourses
@@ -37,9 +38,9 @@ router.get('/', auth, async (req, res) => {
         const dashboardData = {
             stats: {
                 activeEnrollments: statsResult.recordset[0]?.TotalCourses || 0,
-                completedAssignments: 0, // Tạm để 0
-                averageScore: 0, // Tạm để 0 
-                totalStudyTime: "0h" // Tạm để 0h
+                completedAssignments: 0,
+                averageScore: 0,
+                totalStudyTime: "0h"
             },
             progressData: [
                 { name: 'Tuần 1', progress: 20 },
@@ -55,7 +56,7 @@ router.get('/', auth, async (req, res) => {
                 { subject: 'Database', mastery: 45, gap: 55 },
                 { subject: 'DevOps', mastery: 30, gap: 70 }
             ],
-            recommendedPaths: [], // Sẽ được lấy từ API riêng
+            recommendedPaths: [],
             aiPrediction: {
                 status: 'success',
                 cluster: 2,
@@ -80,5 +81,196 @@ router.get('/', auth, async (req, res) => {
         });
     }
 });
+
+// ✅ AI prediction endpoint với StudentBehavior_test data
+router.get('/ai-prediction/:userId', auth, async (req, res) => {
+    try {
+        const { userId } = req.params;
+        console.log(`🤖 Dashboard AI prediction for user: ${userId}`);
+
+        // Get real data từ StudentBehavior_test table
+        const studentData = await getStudentTestData(userId);
+
+        if (!studentData) {
+            console.log(`⚠️  No test data for user ${userId}, using fallback`);
+            return res.json({
+                success: true,
+                data: getFakeAIData(),
+                source: 'fallback_no_data',
+                message: `No data found for user ${userId} in test table`
+            });
+        }
+
+        console.log(`📊 Found test data for user ${userId}:`, studentData);
+
+        // Call real AI model
+        const aiPrediction = await callRealAIModel(studentData);
+
+        if (aiPrediction.success) {
+            console.log(`✅ AI prediction successful for user ${userId}`);
+            res.json({
+                success: true,
+                data: aiPrediction.data,
+                source: 'real_ai_test_data',
+                input_data: studentData,
+                actual_grade: studentData.FinalGrade // For comparison
+            });
+        } else {
+            console.log(`❌ AI prediction failed for user ${userId}:`, aiPrediction.error);
+            res.json({
+                success: true,
+                data: getFakeAIData(),
+                source: 'fallback_ai_error',
+                error: aiPrediction.error,
+                input_data: studentData
+            });
+        }
+
+    } catch (error) {
+        console.error('❌ Dashboard AI error:', error);
+        res.json({
+            success: true,
+            data: getFakeAIData(),
+            source: 'fallback_exception',
+            error: error.message
+        });
+    }
+});
+
+// ===== HELPER FUNCTIONS =====
+
+// ✅ Updated to use StudentBehavior_test
+async function getStudentTestData(userId) {
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request()
+            .input('userId', sql.Int, parseInt(userId))
+            .query(`
+                SELECT TOP 1 
+                    StudyHours, AssignmentCompletionRate, QuizScore_Avg,
+                    PlatformEngagement_Minutes, LearningStyle, Motivation, 
+                    StressLevel, FinalGrade, RecordedDate
+                FROM [smart_lms].[dbo].[StudentBehavior_test]
+                WHERE UserID = @userId 
+                ORDER BY RecordedDate DESC
+            `);
+
+        return result.recordset.length > 0 ? result.recordset[0] : null;
+    } catch (error) {
+        console.error('❌ Database error getting test data:', error);
+        return null;
+    }
+}
+
+async function callRealAIModel(studentData) {
+    const { spawn } = require('child_process');
+    const path = require('path');
+
+    return new Promise((resolve) => {
+        try {
+            const scriptPath = path.join(__dirname, '../../../smart-lms-ml/predict_for_api.py');
+
+            // Prepare data for ML model (exclude FinalGrade from input)
+            const mlInputData = {
+                StudyHours: studentData.StudyHours,
+                AssignmentCompletionRate: studentData.AssignmentCompletionRate,
+                QuizScore_Avg: studentData.QuizScore_Avg,
+                PlatformEngagement_Minutes: studentData.PlatformEngagement_Minutes,
+                Motivation: studentData.Motivation,
+                StressLevel: studentData.StressLevel,
+                LearningStyle: studentData.LearningStyle
+            };
+
+            const inputJson = JSON.stringify(mlInputData);
+            console.log('🐍 Calling AI model with test data...');
+
+            const pythonProcess = spawn('python', [scriptPath, '--input', inputJson], {
+                cwd: path.join(__dirname, '../../../smart-lms-ml/'),
+                stdio: ['pipe', 'pipe', 'pipe']
+            });
+
+            let output = '';
+            let errorOutput = '';
+
+            pythonProcess.stdout.on('data', (data) => {
+                output += data.toString();
+            });
+
+            pythonProcess.stderr.on('data', (data) => {
+                errorOutput += data.toString();
+            });
+
+            pythonProcess.on('close', (code) => {
+                console.log(`🐍 Python process completed with code: ${code}`);
+
+                if (code === 0) {
+                    try {
+                        const result = JSON.parse(output.trim());
+                        console.log('✅ AI model returned valid JSON');
+                        resolve(result);
+                    } catch (parseError) {
+                        console.error('❌ Failed to parse AI output:', parseError.message);
+                        resolve({
+                            success: false,
+                            error: `Parse error: ${parseError.message}`,
+                            raw_output: output.substring(0, 200)
+                        });
+                    }
+                } else {
+                    console.error('❌ Python process failed:', errorOutput);
+                    resolve({
+                        success: false,
+                        error: `Python failed (exit code ${code})`,
+                        stderr: errorOutput.substring(0, 200)
+                    });
+                }
+            });
+
+            pythonProcess.on('error', (processError) => {
+                console.error('❌ Failed to start Python process:', processError);
+                resolve({
+                    success: false,
+                    error: `Process start failed: ${processError.message}`
+                });
+            });
+
+        } catch (error) {
+            resolve({
+                success: false,
+                error: `Call failed: ${error.message}`
+            });
+        }
+    });
+}
+
+function getFakeAIData() {
+    return {
+        prediction_summary: {
+            performance_level: "Khá",
+            cluster_group: 2,
+            cluster_name: "Nhóm tiến bộ tốt (Fallback)",
+            confidence: 75.0
+        },
+        detailed_analysis: {
+            grade_probabilities: {
+                "Xuất sắc": 10.0,
+                "Giỏi": 20.0,
+                "Khá": 75.0,
+                "Trung bình": 15.0
+            },
+            grade_interpretation: "Fallback data - not real AI prediction"
+        },
+        recommendations: {
+            study_approach: "Using fallback recommendations",
+            focus_areas: ["Enable real AI integration"],
+            next_steps: "Fix AI model connection"
+        },
+        metadata: {
+            model_version: "fallback_v1.0",
+            timestamp: new Date().toISOString(),
+            source: "fake_data"
+        }
+    };
+}
 
 module.exports = router;

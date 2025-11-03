@@ -5,7 +5,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import Sidebar from '../components/layout/Sidebar';
 // import RecentActivities from '../components/dashboard/RecentActivities';
 import UpcomingDeadlines from '../components/dashboard/UpcomingDeadlines';
-import PerformanceMetrics from '../components/dashboard/PerformanceMetrics';
+// import PerformanceMetrics from '../components/dashboard/PerformanceMetrics';
 import AIPredictionCard from '../components/dashboard/AIPredictionCard';
 import RecommendationCard from '../components/common/RecommendationCard';
 import './Dashboard.css';
@@ -50,23 +50,7 @@ const FAKE_DASHBOARD_DATA = {
             difficulty: "Nâng cao",
             match: 85
         }
-    ],
-    aiPrediction: {
-        status: 'success',
-        cluster: 2,
-        predicted_grade: 'Khá',
-        probabilities: {
-            'Giỏi': 0.15,
-            'Khá': 0.65,
-            'Trung bình': 0.18,
-            'Yếu': 0.02
-        },
-        recommendations: [
-            "Bạn thuộc nhóm học viên có hiệu suất tốt",
-            "Nên tập trung vào các bài tập thực hành nhiều hơn",
-            "Có thể thử thách bản thân với các khóa học nâng cao"
-        ]
-    }
+    ]
 };
 
 // === LEARNING PATH ANALYTICS TIME SERIES ===
@@ -126,6 +110,9 @@ function Dashboard() {
         aiPrediction: null
     });
 
+    const [aiPrediction, setAiPrediction] = useState(null);
+    const [aiLoading, setAiLoading] = useState(true);
+
     // State mới cho Learning Path Analytics Time Series
     const [timePeriod, setTimePeriod] = useState(30);
     const [timeSeriesData, setTimeSeriesData] = useState([]);
@@ -177,6 +164,73 @@ function Dashboard() {
         fetchRecommendedPaths();
     }, []);
 
+    // ✅ ADD: New function to fetch real AI prediction
+    const fetchAIPrediction = async () => {
+        try {
+            setAiLoading(true);
+            const token = localStorage.getItem('token');
+
+            if (!token) return;
+
+            // Get current user ID (adjust based on your user storage)
+            const userInfo = JSON.parse(localStorage.getItem('user') || '{}');
+            const userId = userInfo.id || 5; // Default to 5 for testing
+
+            console.log(`🤖 Fetching AI prediction for user: ${userId}`);
+
+            const response = await axios.get(`/api/dashboard/ai-prediction/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            console.log('✅ AI Prediction response:', response.data);
+
+            if (response.data.success) {
+                // Transform backend data to frontend format
+                const backendData = response.data.data;
+                const transformedData = {
+                    status: 'success',
+                    cluster: backendData.prediction_summary?.cluster_group || 2,
+                    predicted_grade: backendData.prediction_summary?.performance_level || 'Khá',
+                    probabilities: backendData.detailed_analysis?.grade_probabilities || {
+                        'Giỏi': 15,
+                        'Khá': 65,
+                        'Trung bình': 18,
+                        'Yếu': 2
+                    },
+                    recommendations: [
+                        backendData.recommendations?.study_approach || "Phương pháp học tập phù hợp",
+                        "Focus: " + (backendData.recommendations?.focus_areas?.join(', ') || "Cải thiện kỹ năng"),
+                        backendData.recommendations?.next_steps || "Tiếp tục phát triển"
+                    ]
+                };
+
+                setAiPrediction(transformedData);
+            }
+
+        } catch (err) {
+            console.error('❌ AI prediction error:', err);
+            // Fallback to fake data
+            setAiPrediction({
+                status: 'error',
+                cluster: 2,
+                predicted_grade: 'Khá (Fallback)',
+                probabilities: {
+                    'Giỏi': 15,
+                    'Khá': 65,
+                    'Trung bình': 18,
+                    'Yếu': 2
+                },
+                recommendations: [
+                    "AI service unavailable - using fallback data",
+                    "Please check backend connection",
+                    "Contact administrator if problem persists"
+                ]
+            });
+        } finally {
+            setAiLoading(false);
+        }
+    };
+    useEffect(() => { fetchAIPrediction(); }, []);
 
     const loadUserData = async () => {
         try {
@@ -292,7 +346,23 @@ function Dashboard() {
                     </div>
 
                     <div className="ai-column">
-                        <AIPredictionCard prediction={dashboardData.aiPrediction} />
+                        {aiLoading ? (
+                            <div style={{ padding: '20px', textAlign: 'center' }}>
+                                <h3>🤖 Đang tải AI Analysis...</h3>
+                                <p>Phân tích dữ liệu học tập của bạn...</p>
+                            </div>
+                        ) : aiPrediction ? (
+                            <AIPredictionCard
+                                prediction={aiPrediction}
+                                onRefresh={() => fetchAIPrediction()}
+                            />
+                        ) : (
+                            <div style={{ padding: '20px', textAlign: 'center' }}>
+                                <h3>❌ AI Analysis không khả dụng</h3>
+                                <button onClick={fetchAIPrediction}>Thử lại</button>
+                            </div>
+                        )}
+
                     </div>
                 </div>
 
