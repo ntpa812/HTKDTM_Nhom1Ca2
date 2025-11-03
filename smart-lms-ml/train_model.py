@@ -37,7 +37,7 @@ def fetch_data():
         cnxn = pyodbc.connect(conn_str)
         # ✅ FIX: Query chỉ lấy các columns còn lại (không có DeviceType, SatisfactionLevel)
         query = """
-        SELECT UserID, StudyHours, AssignmentCompletionRate, QuizScore_Avg, 
+        SELECT StudyHours, AssignmentCompletionRate, QuizScore_Avg, 
                PlatformEngagement_Minutes, LearningStyle, Motivation, StressLevel, FinalGrade 
         FROM StudentBehaviors
         """
