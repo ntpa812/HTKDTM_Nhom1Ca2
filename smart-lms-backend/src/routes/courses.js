@@ -13,14 +13,5 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
-  try {
-    const [rows] = await pool.query("SELECT * FROM Courses");
-    res.json(rows);
-  } catch (err) {
-    console.error("❌ Lỗi khi lấy danh sách khóa học:", err.message);
-    res.status(500).json({ error: "Lỗi server khi lấy danh sách khóa học." });
-  }
-});
 
 module.exports = router;
