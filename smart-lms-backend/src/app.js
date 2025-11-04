@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
 // Route để kiểm tra kết nối CSDL
 app.get('/api/test-db', async (req, res) => {
   try {
-    const pool = require('../config/db'); // lấy pool MySQL từ config/db.js
+    const pool = require('../config/database'); // lấy pool MySQL từ config/db.js
     const [rows] = await pool.query('SELECT NOW() AS currentTime');
     res.status(200).json({
       success: true,
