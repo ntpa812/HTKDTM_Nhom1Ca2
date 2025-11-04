@@ -3,7 +3,26 @@ const router = express.Router();
 const { poolPromise, sql } = require('../../config/database');
 const { authenticateToken } = require('../middleware/auth');
 
-// === ROUTE 1: LẤY TẤT CẢ KHÓA HỌC ===
+// === ROUTE 1: LẤY TẤT CẢ KHÓA HỌC (PUBLIC TEST) ===
+// GET /api/courses/public
+router.get('/public', async (req, res) => {
+    console.log(`[PUBLIC] GET /api/courses/public - đang lấy danh sách khóa học (bỏ qua token)`);
+    try {
+        const pool = await poolPromise;
+        const result = await pool.request().query(`
+            SELECT c.*, u.full_name AS instructor_name
+            FROM dbo.Courses c
+            LEFT JOIN dbo.Users u ON c.instructor_id = u.id
+            ORDER BY c.id;
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (error) {
+        console.error('❌ Lỗi khi lấy danh sách khóa học (public):', error.message);
+        res.status(500).json({ success: false, message: 'Lỗi server khi lấy danh sách khóa học (public).' });
+    }
+});
+
+// === ROUTE 2: LẤY TẤT CẢ KHÓA HỌC (CÓ TOKEN) ===
 // GET /api/courses
 router.get('/', authenticateToken, async (req, res) => {
     console.log(`[OK] Matched: GET /api/courses. Đang lấy danh sách khóa học...`);
@@ -22,7 +41,7 @@ router.get('/', authenticateToken, async (req, res) => {
     }
 });
 
-// === ROUTE 2: LẤY CHI TIẾT MỘT KHÓA HỌC ===
+// === ROUTE 3: LẤY CHI TIẾT MỘT KHÓA HỌC ===
 // GET /api/courses/:id
 router.get('/:id', authenticateToken, async (req, res) => {
     const { id: courseId } = req.params;
