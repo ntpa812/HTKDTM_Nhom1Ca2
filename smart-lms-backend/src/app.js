@@ -1,5 +1,7 @@
 // --- 1. IMPORT CÁC MODULE CẦN THIẾT ---
 require('dotenv').config();
+const db = require('./config/db');
+
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -53,23 +55,23 @@ app.get('/', (req, res) => {
 
 // Route để kiểm tra kết nối CSDL
 app.get('/api/test-db', async (req, res) => {
-    try {
-        const { poolPromise } = require('../config/database'); // Chỉ require khi cần
-        const pool = await poolPromise;
-        const result = await pool.request().query('SELECT @@VERSION as version');
-        res.status(200).json({
-            success: true,
-            message: 'Database connection is OK.',
-            data: result.recordset[0]
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: 'Database connection failed.',
-            error: error.message
-        });
-    }
+  try {
+    const db = require('./config/db');
+    const [rows] = await db.query('SELECT NOW() as currentTime');
+    res.status(200).json({
+      success: true,
+      message: '✅ MySQL database connected successfully!',
+      data: rows[0],
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: '❌ Database connection failed.',
+      error: error.message,
+    });
+  }
 });
+
 
 
 // --- 6. XỬ LÝ LỖI (ERROR HANDLING) ---

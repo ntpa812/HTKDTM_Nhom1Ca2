@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { poolPromise, sql } = require('../../config/database'); // ← FIX: 2 dấu ..
+const pool = require('../config/db'); // ← FIX: 2 dấu ..
 const { authenticateToken, authorizeRole } = require('../middleware/auth');
 
 // Get all users (admin only)

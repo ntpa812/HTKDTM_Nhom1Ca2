@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const { poolPromise, sql } = require('../../config/database');
+const db = require('../config/db');
 const { authenticateToken: auth } = require('../middleware/auth');
 
 // Main dashboard endpoint
