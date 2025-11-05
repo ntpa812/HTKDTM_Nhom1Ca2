@@ -13,7 +13,7 @@ router.get('/public', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT c.*, u.full_name AS instructor_name
       FROM courses c
-      LEFT JOIN Users u ON c.instructor_id = u.id
+      LEFT JOIN users u ON c.instructor_id = u.id
       ORDER BY c.id;
     `);
     res.json({ success: true, data: rows });
@@ -32,7 +32,7 @@ router.get('/', authenticateToken, async (req, res) => {
     const [rows] = await pool.query(`
       SELECT c.*, u.full_name AS instructor_name
       FROM courses c
-      LEFT JOIN Users u ON c.instructor_id = u.id
+      LEFT JOIN users u ON c.instructor_id = u.id
       ORDER BY c.id;
     `);
     res.json({ success: true, data: rows });
@@ -55,7 +55,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
     const [courseResult] = await pool.query(
       `SELECT c.*, u.full_name AS instructor_name
        FROM courses c
-       LEFT JOIN Users u ON c.instructor_id = u.id
+       LEFT JOIN users u ON c.instructor_id = u.id
        WHERE c.id = ?`,
       [courseId]
     );

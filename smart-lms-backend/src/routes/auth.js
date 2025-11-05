@@ -24,7 +24,7 @@ router.post('/login', async (req, res) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('email', sql.NVarChar, email)
-            .query('SELECT id, username, email, password, full_name, role, learning_style FROM Users WHERE email = @email');
+            .query('SELECT id, username, email, password, full_name, role, learning_style FROM users WHERE email = @email');
 
         if (result.recordset.length === 0) {
             return res.status(401).json({
@@ -91,7 +91,7 @@ router.post('/register', async (req, res) => {
         const checkUser = await pool.request()
             .input('email', sql.NVarChar, email)
             .input('username', sql.NVarChar, username)
-            .query('SELECT id FROM Users WHERE email = @email OR username = @username');
+            .query('SELECT id FROM users WHERE email = @email OR username = @username');
 
         if (checkUser.recordset.length > 0) {
             return res.status(400).json({
@@ -108,7 +108,7 @@ router.post('/register', async (req, res) => {
             .input('password', sql.NVarChar, hashedPassword)
             .input('full_name', sql.NVarChar, full_name || username)
             .query(`
-        INSERT INTO Users (username, email, password, full_name, role, created_at)
+        INSERT INTO users (username, email, password, full_name, role, created_at)
         OUTPUT INSERTED.id, INSERTED.username, INSERTED.email, INSERTED.full_name, INSERTED.role
         VALUES (@username, @email, @password, @full_name, 'student', GETDATE())
       `);
