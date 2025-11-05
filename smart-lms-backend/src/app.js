@@ -51,25 +51,32 @@ app.get('/', (req, res) => {
     res.status(200).send('<h1>Smart LMS Backend API is running...</h1>');
 });
 
-// Route để kiểm tra kết nối CSDL
+// --- TEST MYSQL CONNECTION ---
 app.get('/api/test-db', async (req, res) => {
   try {
-const pool = require('./config/database').poolPromise || require('./config/database');
+    const db = require('./config/database');
+    const pool = db.poolPromise || db;
+
+    console.log('🔍 Checking MySQL connection...');
     const [rows] = await pool.query('SELECT NOW() AS currentTime');
-    res.status(200).json({
+    console.log('✅ MySQL query success:', rows[0]);
+
+    return res.status(200).json({
       success: true,
       message: '✅ MySQL database connected successfully!',
       data: rows[0],
     });
+
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
-    res.status(500).json({
+    console.error('❌ Database connection failed:', error);
+    return res.status(500).json({
       success: false,
       message: '❌ Database connection failed.',
       error: error.message,
     });
   }
 });
+
 
 
 
