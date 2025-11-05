@@ -1,12 +1,9 @@
 const mysql = require('mysql2/promise');
 
-const poolPromise = mysql.createPool({
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-  port: process.env.MYSQLPORT,
-  charset: 'utf8mb4'
-});
+// ✅ Lấy URL từ biến môi trường trên Railway
+const connectionUrl = process.env.DATABASE_URL;
+
+// ✅ Khởi tạo connection pool có SSL để Railway cho phép kết nối
+const poolPromise = mysql.createPool(connectionUrl + '?ssl={"rejectUnauthorized":true}');
 
 module.exports = { poolPromise };
