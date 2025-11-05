@@ -51,15 +51,20 @@ app.get('/', (req, res) => {
     res.status(200).send('<h1>Smart LMS Backend API is running...</h1>');
 });
 
-// --- TEST MYSQL CONNECTION ---
 app.get('/api/test-db', async (req, res) => {
+  console.log('🧭 /api/test-db endpoint hit');
   try {
     const db = require('./config/database');
     const pool = db.poolPromise || db;
+    console.log('🔍 Checking MySQL connection using config:', {
+      host: process.env.MYSQLHOST,
+      port: process.env.MYSQLPORT,
+      user: process.env.MYSQLUSER,
+      database: process.env.MYSQLDATABASE,
+    });
 
-    console.log('🔍 Checking MySQL connection...');
     const [rows] = await pool.query('SELECT NOW() AS currentTime');
-    console.log('✅ MySQL query success:', rows[0]);
+    console.log('✅ Query success:', rows);
 
     return res.status(200).json({
       success: true,
@@ -76,6 +81,7 @@ app.get('/api/test-db', async (req, res) => {
     });
   }
 });
+
 
 
 
