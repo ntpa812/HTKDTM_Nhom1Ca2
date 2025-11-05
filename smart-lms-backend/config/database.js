@@ -1,9 +1,13 @@
 const mysql = require('mysql2/promise');
 
-// ✅ Lấy URL từ biến môi trường trên Railway
 const connectionUrl = process.env.DATABASE_URL;
 
-// ✅ Khởi tạo connection pool có SSL để Railway cho phép kết nối
-const poolPromise = mysql.createPool(connectionUrl + '?ssl={"rejectUnauthorized":true}');
+const poolPromise = mysql.createPool({
+  uri: connectionUrl,
+  ssl: {
+    // ✅ Cho phép chứng chỉ tự ký để tránh lỗi HANDSHAKE_SSL_ERROR
+    rejectUnauthorized: false
+  }
+});
 
 module.exports = { poolPromise };
