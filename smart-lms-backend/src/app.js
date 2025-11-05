@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
 app.get('/api/test-db', async (req, res) => {
   console.log('🧭 /api/test-db endpoint hit');
   try {
-    const db = require('./config/database');
+    const db = require('../config/database');
     const pool = db.poolPromise || db;
     console.log('🔍 Checking MySQL connection using config:', {
       host: process.env.MYSQLHOST,
