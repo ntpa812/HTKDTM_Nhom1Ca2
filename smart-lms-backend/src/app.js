@@ -109,11 +109,12 @@ app.use((err, req, res, next) => {
 
 
 // --- 7. KHỞI ĐỘNG SERVER ---
-const PORT = process.env.PORT || process.env.RAILWAY_PORT || 5000;
+const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server is running and listening on 0.0.0.0:${PORT}`);
 });
+
 
 
 // --- 8. EXPORT APP (DÙNG CHO VIỆC TEST) ---
