@@ -12,7 +12,7 @@ router.get('/public', async (req, res) => {
     const pool = await poolPromise;
     const [rows] = await pool.query(`
       SELECT c.*, u.full_name AS instructor_name
-      FROM Courses c
+      FROM courses c
       LEFT JOIN Users u ON c.instructor_id = u.id
       ORDER BY c.id;
     `);
@@ -31,7 +31,7 @@ router.get('/', authenticateToken, async (req, res) => {
     const pool = await poolPromise;
     const [rows] = await pool.query(`
       SELECT c.*, u.full_name AS instructor_name
-      FROM Courses c
+      FROM courses c
       LEFT JOIN Users u ON c.instructor_id = u.id
       ORDER BY c.id;
     `);
@@ -54,7 +54,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
     // Lấy thông tin khóa học
     const [courseResult] = await pool.query(
       `SELECT c.*, u.full_name AS instructor_name
-       FROM Courses c
+       FROM courses c
        LEFT JOIN Users u ON c.instructor_id = u.id
        WHERE c.id = ?`,
       [courseId]

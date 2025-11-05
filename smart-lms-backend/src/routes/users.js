@@ -8,7 +8,7 @@ router.get('/', authenticateToken, authorizeRole('admin'), async (req, res) => {
     try {
         const pool = await poolPromise;
         const result = await pool.request()
-            .query('SELECT id, username, email, full_name, role, learning_style, created_at FROM Users ORDER BY id');
+            .query('SELECT id, username, email, full_name, role, learning_style, created_at FROM users ORDER BY id');
 
         res.json({
             success: true,
@@ -35,7 +35,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
         const pool = await poolPromise;
         const result = await pool.request()
             .input('id', sql.Int, id)
-            .query('SELECT id, username, email, full_name, role, learning_style, created_at FROM Users WHERE id = @id');
+            .query('SELECT id, username, email, full_name, role, learning_style, created_at FROM users WHERE id = @id');
 
         if (result.recordset.length === 0) {
             return res.status(404).json({
