@@ -54,7 +54,7 @@ app.get('/', (req, res) => {
 // Route để kiểm tra kết nối CSDL
 app.get('/api/test-db', async (req, res) => {
   try {
-const pool = require('./../config/database').poolPromise || require('./../config/database');
+const pool = require('./config/database').poolPromise || require('./config/database');
     const [rows] = await pool.query('SELECT NOW() AS currentTime');
     res.status(200).json({
       success: true,
@@ -98,9 +98,8 @@ app.use((err, req, res, next) => {
 // --- 7. KHỞI ĐỘNG SERVER ---
 const PORT = process.env.PORT || process.env.RAILWAY_PORT || 5000;
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server is running on http://0.0.0.0:${PORT}`);
-  console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
 
 
